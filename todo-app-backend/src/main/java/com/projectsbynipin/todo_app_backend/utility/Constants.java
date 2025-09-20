@@ -48,6 +48,8 @@ public class Constants {
         }
 
         public static final String JWT_REFRESH_TOKEN_EXPIRED = "Jwt refresh token expired.";
+        public static final String FAILED_TO_ENCRYPT_TOKEN = "Failed to encrypt JWT refresh token.";
+        public static final String FAILED_TO_DECRYPT_TOKEN = "Failed to decrypt JWT refresh token.";
     }
 
     public static class Miscellaneous {
@@ -57,6 +59,14 @@ public class Constants {
 
         public static final String VALIDATION_FAILED = "Validation failed.";
         public static final String ACCESS_DENIED = "Access denied.";
+    }
+
+    public static class Redis {
+
+        private Redis() {
+        }
+
+        public static final String REDIS_KEY_PREFIX = "refresh-token-";
     }
 
 }

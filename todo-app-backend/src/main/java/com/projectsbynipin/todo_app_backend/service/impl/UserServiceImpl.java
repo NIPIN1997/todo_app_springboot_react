@@ -11,8 +11,10 @@ import com.projectsbynipin.todo_app_backend.mapper.UserMapper;
 import com.projectsbynipin.todo_app_backend.repository.RoleRepository;
 import com.projectsbynipin.todo_app_backend.repository.UserRepository;
 import com.projectsbynipin.todo_app_backend.service.UserService;
+import com.projectsbynipin.todo_app_backend.service.encryption.EncryptionService;
 import com.projectsbynipin.todo_app_backend.service.jwt.JwtService;
 import com.projectsbynipin.todo_app_backend.service.jwt.UserInfoDetails;
+import com.projectsbynipin.todo_app_backend.service.redis.RedisService;
 import com.projectsbynipin.todo_app_backend.utility.ApiResponseCreator;
 import com.projectsbynipin.todo_app_backend.utility.Constants;
 import org.slf4j.Logger;
@@ -35,15 +37,19 @@ public class UserServiceImpl implements UserService {
     private final UserMapper userMapper;
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
+    private final EncryptionService encryptionService;
+    private final RedisService redisService;
 
     private final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
 
-    public UserServiceImpl(UserRepository userRepository, RoleRepository roleRepository, UserMapper userMapper, AuthenticationManager authenticationManager, JwtService jwtService) {
+    public UserServiceImpl(UserRepository userRepository, RoleRepository roleRepository, UserMapper userMapper, AuthenticationManager authenticationManager, JwtService jwtService, EncryptionService encryptionService, RedisService redisService) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.userMapper = userMapper;
         this.authenticationManager = authenticationManager;
         this.jwtService = jwtService;
+        this.encryptionService = encryptionService;
+        this.redisService = redisService;
     }
 
     @Override
@@ -80,7 +86,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public ApiResponse<LoginResponseDto> login(LoginRequestDto loginRequestDto) {
+    public LoginResponseDto login(LoginRequestDto loginRequestDto) {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         loginRequestDto.email(), loginRequestDto.password()
@@ -89,11 +95,14 @@ public class UserServiceImpl implements UserService {
         if (authentication.isAuthenticated()) {
             User user = userRepository.findByEmailAndIsDeleted(loginRequestDto.email(), false);
             logger.info("Login -> User ID: {} , email : {}.", user.getId(), user.getEmail());
-            LoginResponseDto loginResponseDto = new LoginResponseDto(
-                    jwtService.generateToken(loginRequestDto.email()),
-                    jwtService.generateRefreshToken(loginRequestDto.email())
+            String jwtToken = jwtService.generateToken(loginRequestDto.email());
+            String jwtRefreshToken = jwtService.generateRefreshToken(loginRequestDto.email());
+            redisService.storeRefreshToken(loginRequestDto.email(), encryptionService.getEncryptedToken(jwtRefreshToken));
+            LoginResponseDto.Token token = new LoginResponseDto.Token(jwtToken);
+            return new LoginResponseDto(
+                    ApiResponseCreator.success(Constants.Login.LOGIN_SUCCESSFUL, token, HttpStatus.OK),
+                    jwtRefreshToken
             );
-            return ApiResponseCreator.success(Constants.Login.LOGIN_SUCCESSFUL, loginResponseDto, HttpStatus.OK);
         } else {
             logger.error("Failed login attempt -> Email : {}", loginRequestDto.email());
             throw new LoginFailedException(Constants.Login.LOGIN_FAILED);
