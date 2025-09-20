@@ -4,14 +4,14 @@ import com.projectsbynipin.todo_app_backend.dto.*;
 import com.projectsbynipin.todo_app_backend.service.UserService;
 import com.projectsbynipin.todo_app_backend.service.jwt.UserInfoDetails;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
-@Controller
+@RestController
 @RequestMapping(path = "/api/v1/users")
 public class UserController {
 
@@ -21,23 +21,27 @@ public class UserController {
         this.userService = userService;
     }
 
-    @PostMapping(path = "/add-admin")
-    public ResponseEntity<ApiResponse<Void>> addAdmin(@Valid @RequestBody AddUserRequestDto addUserRequestDto) {
-        return userService.addAdmin(addUserRequestDto);
+    @PostMapping(path = "/create-admin")
+    public ResponseEntity<ApiResponse<Void>> createAdmin(@Valid @RequestBody AddUserRequestDto addUserRequestDto) {
+        ApiResponse<Void> apiResponse = userService.createAdmin(addUserRequestDto);
+        return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
     }
 
     @PostMapping(path = "/signup")
-    public ResponseEntity<ApiResponse<Void>> addUser(@Valid @RequestBody AddUserRequestDto addUserRequestDto) {
-        return userService.addUser(addUserRequestDto);
+    public ResponseEntity<ApiResponse<Void>> createUser(@Valid @RequestBody AddUserRequestDto addUserRequestDto) {
+        ApiResponse<Void> apiResponse = userService.createUser(addUserRequestDto);
+        return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
     }
 
     @PostMapping(path = "/login")
     public ResponseEntity<ApiResponse<LoginResponseDto>> login(@Valid @RequestBody LoginRequestDto loginRequestDto) {
-        return userService.login(loginRequestDto);
+        ApiResponse<LoginResponseDto> apiResponse = userService.login(loginRequestDto);
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
     @GetMapping(path = "/get-user/{userId}")
     public ResponseEntity<ApiResponse<ViewUserResponseDto>> getUser(@PathVariable UUID userId, @AuthenticationPrincipal UserInfoDetails userInfoDetails) {
-        return userService.getUser(userId, userInfoDetails);
+        ApiResponse<ViewUserResponseDto> apiResponse = userService.getUser(userId, userInfoDetails);
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 }

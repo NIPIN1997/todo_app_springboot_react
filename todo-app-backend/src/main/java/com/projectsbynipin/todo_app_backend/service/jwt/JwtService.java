@@ -44,7 +44,7 @@ public class JwtService {
     private String createToken(String email, long expirationTime) {
         User user = userRepository.findByEmailAndIsDeleted(email, false);
         if (user == null) {
-            throw new UserNotFoundException(Constants.USER_NOT_FOUND);
+            throw new UserNotFoundException(Constants.User.USER_NOT_FOUND);
         }
         Map<String, Object> claims = new HashMap<>();
         claims.put("role", user.getRole().getName());
@@ -98,7 +98,7 @@ public class JwtService {
 
     public String refreshToken(String token) {
         if (isTokenExpired(token)) {
-            throw new JwtRefreshTokenExpiredException(Constants.JWT_REFRESH_TOKEN_EXPIRED);
+            throw new JwtRefreshTokenExpiredException(Constants.Jwt.JWT_REFRESH_TOKEN_EXPIRED);
         }
         return generateToken(extractUsername(token));
     }

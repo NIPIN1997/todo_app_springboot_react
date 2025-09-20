@@ -21,7 +21,7 @@ public class UserInfoService implements UserDetailsService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         User user = userRepository.findByEmailAndIsDeleted(username, false);
         if (user == null) {
-            throw new UsernameNotFoundException(Constants.USER_NOT_FOUND);
+            throw new UsernameNotFoundException(Constants.User.USER_NOT_FOUND);
         }
         return new UserInfoDetails(user);
     }

@@ -4,13 +4,14 @@ import com.projectsbynipin.todo_app_backend.dto.AddRoleRequestDto;
 import com.projectsbynipin.todo_app_backend.dto.ApiResponse;
 import com.projectsbynipin.todo_app_backend.service.RoleService;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-@Controller
+@RestController
 @RequestMapping(path = "/api/v1/roles")
 public class RoleController {
 
@@ -20,8 +21,9 @@ public class RoleController {
         this.roleService = roleService;
     }
 
-    @PostMapping(path = "/add-role")
-    public ResponseEntity<ApiResponse<Void>> addRole(@Valid @RequestBody AddRoleRequestDto addRoleRequestDto) {
-        return roleService.addRole(addRoleRequestDto);
+    @PostMapping(path = "/create-role")
+    public ResponseEntity<ApiResponse<Void>> createRole(@Valid @RequestBody AddRoleRequestDto addRoleRequestDto) {
+        ApiResponse<Void> apiResponse = roleService.createRole(addRoleRequestDto);
+        return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
     }
 }

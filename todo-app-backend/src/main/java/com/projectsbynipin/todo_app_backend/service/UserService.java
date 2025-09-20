@@ -2,17 +2,15 @@ package com.projectsbynipin.todo_app_backend.service;
 
 import com.projectsbynipin.todo_app_backend.dto.*;
 import com.projectsbynipin.todo_app_backend.service.jwt.UserInfoDetails;
-import jakarta.validation.Valid;
-import org.springframework.http.ResponseEntity;
 
 import java.util.UUID;
 
 public interface UserService {
-    ResponseEntity<ApiResponse<Void>> addAdmin(AddUserRequestDto addUserRequestDto);
+    ApiResponse<Void> createAdmin(AddUserRequestDto addUserRequestDto);
 
-    ResponseEntity<ApiResponse<Void>> addUser(@Valid AddUserRequestDto addUserRequestDto);
+    ApiResponse<Void> createUser(AddUserRequestDto addUserRequestDto);
 
-    ResponseEntity<ApiResponse<LoginResponseDto>> login(@Valid LoginRequestDto loginRequestDto);
+    ApiResponse<LoginResponseDto> login(LoginRequestDto loginRequestDto);
 
-    ResponseEntity<ApiResponse<ViewUserResponseDto>> getUser(UUID userId, UserInfoDetails userInfoDetails);
+    ApiResponse<ViewUserResponseDto> getUser(UUID userId, UserInfoDetails userInfoDetails);
 }
