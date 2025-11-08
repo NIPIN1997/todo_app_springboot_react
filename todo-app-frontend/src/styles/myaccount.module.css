@@ -1,0 +1,58 @@
+.account_division {
+  width: 30%;
+  margin-left: auto;
+  margin-right: auto;
+  height: 350px;
+  border: 1px solid rgb(57, 57, 57);
+  color: rgb(57, 57, 57);
+  position: relative;
+  top: 200px;
+  padding: 30px;
+  font-size: 20px;
+  border-radius: 10px;
+}
+.heading {
+  text-align: center;
+  font-weight: bold;
+  font-size: 30px;
+  margin-bottom: 50px;
+}
+.edit_button_icon_division {
+  display: flex;
+  justify-content: flex-end;
+}
+.edit_button_icon {
+  background-color: white;
+  border: none;
+}
+.form_division {
+  width: 30%;
+  margin-left: auto;
+  margin-right: auto;
+  height: 400px;
+  border: 1px solid rgb(57, 57, 57);
+  color: rgb(57, 57, 57);
+  position: relative;
+  top: 200px;
+  padding: 30px;
+  font-size: 20px;
+  border-radius: 10px;
+}
+.button_division {
+  display: flex;
+  justify-content: space-around;
+}
+.edit_button {
+  color: white;
+  width: 100px;
+  margin-top: 20px;
+  padding: 5px;
+  border-radius: 10px;
+}
+.cancel_button {
+  color: white;
+  width: 100px;
+  margin-top: 20px;
+  padding: 5px;
+  border-radius: 10px;
+}

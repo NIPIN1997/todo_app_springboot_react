@@ -4,6 +4,8 @@ import com.projectsbynipin.todo_app_backend.entity.User;
 import com.projectsbynipin.todo_app_backend.exception.JwtRefreshTokenExpiredException;
 import com.projectsbynipin.todo_app_backend.exception.UserNotFoundException;
 import com.projectsbynipin.todo_app_backend.repository.UserRepository;
+import com.projectsbynipin.todo_app_backend.service.encryption.EncryptionService;
+import com.projectsbynipin.todo_app_backend.service.redis.RedisService;
 import com.projectsbynipin.todo_app_backend.utility.Constants;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -31,9 +33,13 @@ public class JwtService {
     private long jwtRefreshTokenExpiration;
 
     private final UserRepository userRepository;
+    private final RedisService redisService;
+    private final EncryptionService encryptionService;
 
-    public JwtService(UserRepository userRepository) {
+    public JwtService(UserRepository userRepository, RedisService redisService, EncryptionService encryptionService) {
         this.userRepository = userRepository;
+        this.redisService = redisService;
+        this.encryptionService = encryptionService;
     }
 
     private Key getSignkey() {
@@ -101,5 +107,14 @@ public class JwtService {
             throw new JwtRefreshTokenExpiredException(Constants.Jwt.JWT_REFRESH_TOKEN_EXPIRED);
         }
         return generateToken(extractUsername(token));
+    }
+
+    public Boolean validateRefreshToken(String token) {
+        String username = extractUsername(token);
+        if (!isTokenExpired(token) && token.equals(encryptionService.getDecryptedToken(redisService.getRefreshToken(username)))) {
+            redisService.deleteRefreshToken(username);
+            return true;
+        }
+        return false;
     }
 }

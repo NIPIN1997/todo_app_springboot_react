@@ -30,6 +30,8 @@ public class Constants {
         public static final String FAILED_TO_CREATE_USER = "Failed to create user.";
         public static final String USER_RETRIEVED = "User retrieved.";
         public static final String FAILED_TO_RETRIEVE_USER = "Failed to retrieve user.";
+        public static final String USER_EDITED = "User edited successfully.";
+        public static final String FAILED_TO_EDIT_USER = "Failed to edit user.";
 
     }
 
@@ -40,6 +42,8 @@ public class Constants {
 
         public static final String LOGIN_SUCCESSFUL = "Login successful.";
         public static final String LOGIN_FAILED = "Login failed.";
+        public static final String LOGOUT_SUCCESSFUL = "Logout successful.";
+        public static final String LOGOUT_FAILED = "Logout failed.";
     }
 
     public static class Jwt {
@@ -47,7 +51,7 @@ public class Constants {
         private Jwt() {
         }
 
-        public static final String JWT_REFRESH_TOKEN_EXPIRED = "Jwt refresh token expired.";
+        public static final String JWT_REFRESH_TOKEN_EXPIRED = "JWT refresh token expired.";
         public static final String FAILED_TO_ENCRYPT_TOKEN = "Failed to encrypt JWT refresh token.";
         public static final String FAILED_TO_DECRYPT_TOKEN = "Failed to decrypt JWT refresh token.";
     }
@@ -59,6 +63,8 @@ public class Constants {
 
         public static final String VALIDATION_FAILED = "Validation failed.";
         public static final String ACCESS_DENIED = "Access denied.";
+        public static final String CSRF_TOKEN_CREATED = "CSRF token created.";
+        public static final String FAILED_TO_REFRESH_TOKEN = "Failed to refresh token.";
     }
 
     public static class Redis {

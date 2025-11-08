@@ -4,6 +4,7 @@ import com.projectsbynipin.todo_app_backend.filter.JwtAuthFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -29,11 +30,16 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, AuthenticationManager authManager) throws Exception {
-        http.csrf(AbstractHttpConfigurer::disable)
+        http
+                .cors(Customizer.withDefaults())
+                .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/v1/users/login", "/api/v1/users/signup").permitAll()
-                        .requestMatchers("/api/v1/users/add-admin", "/api/v1/roles/add-role").hasAuthority("ROLE_ADMIN")
-                        .requestMatchers("/api/v1/users/get-user").hasAuthority("ROLE_USER")
+                        .requestMatchers("/api/v1/users/create-admin", "/api/v1/roles/create-role").hasAuthority("ROLE_ADMIN")
+                        .requestMatchers(
+                                "/api/v1/users/get-user/**",
+                                "/api/v1/users/edit-user/**"
+                        ).hasAuthority("ROLE_USER")
                         .requestMatchers("/actuator/**").hasAuthority("ROLE_ADMIN")
                         .anyRequest().authenticated()
                 )

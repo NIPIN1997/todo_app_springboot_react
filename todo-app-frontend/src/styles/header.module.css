@@ -1,0 +1,13 @@
+.header_division {
+  background-color: rgb(57, 57, 57);
+  color: white;
+  text-align: center;
+  font-size: 40px;
+  font-weight: bolder;
+  position: fixed;
+  top: 0px;
+  left: 0px;
+  width: 100%;
+  padding: 10px;
+  z-index: 5;
+}

@@ -5,14 +5,11 @@ import com.projectsbynipin.todo_app_backend.service.UserService;
 import com.projectsbynipin.todo_app_backend.service.jwt.UserInfoDetails;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.Duration;
 import java.util.UUID;
 
 @RestController
@@ -41,18 +38,9 @@ public class UserController {
     }
 
     @PostMapping(path = "/login")
-    public ResponseEntity<ApiResponse<LoginResponseDto.Token>> login(@Valid @RequestBody LoginRequestDto loginRequestDto) {
-        LoginResponseDto loginResponseDto = userService.login(loginRequestDto);
-        ResponseCookie responseCookie = ResponseCookie.from("refresh-token", loginResponseDto.refreshToken())
-                .httpOnly(true)
-                .secure(isHttps)
-                .path("/api/v1/users/refresh-token")
-                .sameSite("Strict")
-                .maxAge(Duration.ofHours(1))
-                .build();
-        return ResponseEntity.ok()
-                .header(HttpHeaders.SET_COOKIE, responseCookie.toString())
-                .body(loginResponseDto.apiResponse());
+    public ResponseEntity<ApiResponse<LoginResponseDto>> login(@Valid @RequestBody LoginRequestDto loginRequestDto) {
+        ApiResponse<LoginResponseDto> apiResponse = userService.login(loginRequestDto);
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
     @GetMapping(path = "/get-user/{userId}")
@@ -60,4 +48,23 @@ public class UserController {
         ApiResponse<ViewUserResponseDto> apiResponse = userService.getUser(userId, userInfoDetails);
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
+
+    @PutMapping(path = "/edit-user/{userId}")
+    public ResponseEntity<ApiResponse<Void>> editUser(@PathVariable UUID userId, @RequestBody EditUserRequestDto editUserRequestDto) {
+        ApiResponse<Void> apiResponse = userService.editUser(userId, editUserRequestDto);
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
+
+    @PostMapping(path = "/refresh-token")
+    public ResponseEntity<ApiResponse<LoginResponseDto>> refreshToken(@RequestBody RefreshTokenRequestDto refreshTokenRequestDto) {
+        ApiResponse<LoginResponseDto> apiResponse = userService.refreshToken(refreshTokenRequestDto.refreshToken());
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
+
+    @PostMapping(path = "/logout")
+    public ResponseEntity<ApiResponse<Void>> logout(@AuthenticationPrincipal UserInfoDetails userInfoDetails) {
+        ApiResponse<Void> apiResponse = userService.logout(userInfoDetails.getUsername());
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
+
 }

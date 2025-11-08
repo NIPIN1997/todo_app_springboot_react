@@ -10,7 +10,13 @@ public interface UserService {
 
     ApiResponse<Void> createUser(AddUserRequestDto addUserRequestDto);
 
-    LoginResponseDto login(LoginRequestDto loginRequestDto);
+    ApiResponse<LoginResponseDto> login(LoginRequestDto loginRequestDto);
 
     ApiResponse<ViewUserResponseDto> getUser(UUID userId, UserInfoDetails userInfoDetails);
+
+    ApiResponse<LoginResponseDto> refreshToken(String refreshToken);
+
+    ApiResponse<Void> editUser(UUID userId, EditUserRequestDto editUserRequestDto);
+
+    ApiResponse<Void> logout(String username);
 }

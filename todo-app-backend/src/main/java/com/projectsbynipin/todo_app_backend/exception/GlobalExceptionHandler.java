@@ -72,4 +72,22 @@ public class GlobalExceptionHandler {
         ApiResponse<Void> apiResponse = ApiResponseCreator.error(ex.getMessage(), HttpStatus.BAD_REQUEST);
         return new ResponseEntity<>(apiResponse, HttpStatus.BAD_REQUEST);
     }
+
+    @ExceptionHandler(FailedToRefreshTokenException.class)
+    public ResponseEntity<ApiResponse<Void>> handleFailedToRefreshTokenException(FailedToRefreshTokenException ex) {
+        ApiResponse<Void> apiResponse = ApiResponseCreator.error(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        return new ResponseEntity<>(apiResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @ExceptionHandler(FailedToEditUserException.class)
+    public ResponseEntity<ApiResponse<Void>> handleFailedToEditUserException(FailedToEditUserException ex) {
+        ApiResponse<Void> apiResponse = ApiResponseCreator.error(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        return new ResponseEntity<>(apiResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @ExceptionHandler(LogoutFailedException.class)
+    public ResponseEntity<ApiResponse<Void>> handleLogoutFailedException(LogoutFailedException ex) {
+        ApiResponse<Void> apiResponse = ApiResponseCreator.error(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        return new ResponseEntity<>(apiResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
 }

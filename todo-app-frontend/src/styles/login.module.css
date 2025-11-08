@@ -1,0 +1,32 @@
+.form_division {
+  width: 30%;
+  margin-left: auto;
+  margin-right: auto;
+  height: 350px;
+  border: 1px solid rgb(57, 57, 57);
+  color: rgb(57, 57, 57);
+  position: relative;
+  top: 200px;
+  padding: 30px;
+  font-size: 20px;
+  border-radius: 10px;
+}
+.heading {
+  text-align: center;
+  font-weight: bold;
+  font-size: 30px;
+  margin-bottom: 50px;
+}
+.submit_button_division {
+  width: 30%;
+  margin-left: auto;
+  margin-right: auto;
+}
+.submit_button {
+  background-color: rgb(57, 57, 57);
+  color: white;
+  width: 100%;
+  margin-top: 20px;
+  padding: 5px;
+  border-radius: 10px;
+}
