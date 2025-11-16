@@ -90,4 +90,16 @@ public class GlobalExceptionHandler {
         ApiResponse<Void> apiResponse = ApiResponseCreator.error(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         return new ResponseEntity<>(apiResponse, HttpStatus.INTERNAL_SERVER_ERROR);
     }
+
+    @ExceptionHandler(FailedToRetrieveDevicesException.class)
+    public ResponseEntity<ApiResponse<Void>> handleFailedToRetrieveDevicesException(FailedToRetrieveDevicesException ex) {
+        ApiResponse<Void> apiResponse = ApiResponseCreator.error(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        return new ResponseEntity<>(apiResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @ExceptionHandler(FailedToLogoutDeviceException.class)
+    public ResponseEntity<ApiResponse<Void>> handleFailedToLogoutDeviceException(FailedToLogoutDeviceException ex) {
+        ApiResponse<Void> apiResponse = ApiResponseCreator.error(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        return new ResponseEntity<>(apiResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
 }

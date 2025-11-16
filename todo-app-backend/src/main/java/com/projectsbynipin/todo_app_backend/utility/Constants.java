@@ -32,6 +32,8 @@ public class Constants {
         public static final String FAILED_TO_RETRIEVE_USER = "Failed to retrieve user.";
         public static final String USER_EDITED = "User edited successfully.";
         public static final String FAILED_TO_EDIT_USER = "Failed to edit user.";
+        public static final String LOGGED_IN_DEVICES_RETRIEVED = "Logged in devices retrieved successfully.";
+        public static final String FAILED_TO_RETRIEVE_LOGGED_IN_DEVICES = "Failed to retrieve devices.";
 
     }
 
@@ -44,6 +46,9 @@ public class Constants {
         public static final String LOGIN_FAILED = "Login failed.";
         public static final String LOGOUT_SUCCESSFUL = "Logout successful.";
         public static final String LOGOUT_FAILED = "Logout failed.";
+        public static final String LOGIN_DEVICE_LIMIT_REACHED = "Login failed. Cannot login on more that two devices.";
+        public static final String DEVICE_LOGGED_OUT = "Device logged out.";
+        public static final String DEVICE_LOG_OUT_FAILED = "Device log out failed.";
     }
 
     public static class Jwt {

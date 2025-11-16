@@ -14,13 +14,21 @@ export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(() =>
     sessionStorage.getItem("isAuthenticated")
   );
+  const [deviceId, setDeviceId] = useState(() =>
+    localStorage.getItem("deviceId")
+  );
+
   const intervalReference = useRef();
   const jwtTokenReference = useRef(jwtToken);
   const refreshTokenReference = useRef(refreshToken);
+  const deviceIdReference = useRef(deviceId);
+
   useEffect(() => {
     jwtTokenReference.current = jwtToken;
     refreshTokenReference.current = refreshToken;
-  }, [jwtToken, refreshToken]);
+    deviceIdReference.current = deviceId;
+  }, [jwtToken, refreshToken, deviceId]);
+
   const handleLogout = () => {
     if (intervalReference.current) {
       clearInterval(intervalReference.current);
@@ -28,8 +36,10 @@ export const AuthProvider = ({ children }) => {
     setJwtToken(null);
     setRefreshToken(null);
     setIsAuthenticated(false);
+    setDeviceId(null);
     logout(jwtToken);
   };
+
   useEffect(() => {
     if (intervalReference.current) {
       clearInterval(intervalReference.current);
@@ -41,7 +51,8 @@ export const AuthProvider = ({ children }) => {
       try {
         const response = await tokenRefreshApi(
           jwtTokenReference.current,
-          refreshTokenReference.current
+          refreshTokenReference.current,
+          deviceIdReference.current
         );
         if (response.data.status == "SUCCESS") {
           setJwtToken(response.data.data.jwtToken);
@@ -64,16 +75,19 @@ export const AuthProvider = ({ children }) => {
     }, 240000);
     return () => clearInterval(intervalReference.current);
   }, [jwtToken, refreshToken]);
+
   const login = async (data) => {
     try {
       const response = await loginApi(data);
       if (response.data.status == "SUCCESS") {
         setJwtToken(response.data.data.jwtToken);
         setRefreshToken(response.data.data.refreshToken);
+        setDeviceId(response.data.data.deviceId);
         setIsAuthenticated(true);
         sessionStorage.setItem("jwtToken", response.data.data.jwtToken);
         sessionStorage.setItem("refreshToken", response.data.data.refreshToken);
         sessionStorage.setItem("isAuthenticated", true);
+        localStorage.setItem("deviceId", response.data.data.deviceId);
         return { success: true, message: null };
       } else {
         return { success: false, message: response.message };
@@ -86,11 +100,13 @@ export const AuthProvider = ({ children }) => {
       return { success: false, message: errorMessage };
     }
   };
+
   const value = {
     jwtToken,
     login,
     handleLogout,
     refreshToken,
+    deviceId,
     isAuthenticated,
   };
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

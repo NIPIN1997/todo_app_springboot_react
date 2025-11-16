@@ -1,9 +1,11 @@
 package com.projectsbynipin.todo_app_backend.service.jwt;
 
 import com.projectsbynipin.todo_app_backend.entity.User;
+import com.projectsbynipin.todo_app_backend.entity.UserSession;
 import com.projectsbynipin.todo_app_backend.exception.JwtRefreshTokenExpiredException;
 import com.projectsbynipin.todo_app_backend.exception.UserNotFoundException;
 import com.projectsbynipin.todo_app_backend.repository.UserRepository;
+import com.projectsbynipin.todo_app_backend.repository.UserSessionRepository;
 import com.projectsbynipin.todo_app_backend.service.encryption.EncryptionService;
 import com.projectsbynipin.todo_app_backend.service.redis.RedisService;
 import com.projectsbynipin.todo_app_backend.utility.Constants;
@@ -20,6 +22,7 @@ import java.security.Key;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import java.util.function.Function;
 
 @Service
@@ -35,11 +38,13 @@ public class JwtService {
     private final UserRepository userRepository;
     private final RedisService redisService;
     private final EncryptionService encryptionService;
+    private final UserSessionRepository userSessionRepository;
 
-    public JwtService(UserRepository userRepository, RedisService redisService, EncryptionService encryptionService) {
+    public JwtService(UserRepository userRepository, RedisService redisService, EncryptionService encryptionService, UserSessionRepository userSessionRepository) {
         this.userRepository = userRepository;
         this.redisService = redisService;
         this.encryptionService = encryptionService;
+        this.userSessionRepository = userSessionRepository;
     }
 
     private Key getSignkey() {
@@ -47,7 +52,7 @@ public class JwtService {
         return Keys.hmacShaKeyFor(bytes);
     }
 
-    private String createToken(String email, long expirationTime) {
+    private String createToken(String email, long expirationTime, UUID deviceId) {
         User user = userRepository.findByEmailAndIsDeleted(email, false);
         if (user == null) {
             throw new UserNotFoundException(Constants.User.USER_NOT_FOUND);
@@ -55,6 +60,7 @@ public class JwtService {
         Map<String, Object> claims = new HashMap<>();
         claims.put("role", user.getRole().getName());
         claims.put("id", user.getId());
+        claims.put("deviceId", deviceId);
         return Jwts.builder()
                 .claims(claims)
                 .subject(email)
@@ -64,12 +70,12 @@ public class JwtService {
                 .compact();
     }
 
-    public String generateToken(String email) {
-        return createToken(email, jwtTokenExpiration);
+    public String generateToken(String email, UUID deviceId) {
+        return createToken(email, jwtTokenExpiration, deviceId);
     }
 
-    public String generateRefreshToken(String email) {
-        return createToken(email, jwtRefreshTokenExpiration);
+    public String generateRefreshToken(String email, UUID deviceId) {
+        return createToken(email, jwtRefreshTokenExpiration, deviceId);
     }
 
     private Claims extractAllClaims(String token) {
@@ -93,6 +99,10 @@ public class JwtService {
         return extractClaim(token, Claims::getExpiration);
     }
 
+    public UUID extractDeviceId(String token) {
+        return UUID.fromString(extractAllClaims(token).get("deviceId", String.class));
+    }
+
     public boolean isTokenExpired(String token) {
         return extractExpiration(token).before(new Date());
     }
@@ -106,14 +116,23 @@ public class JwtService {
         if (isTokenExpired(token)) {
             throw new JwtRefreshTokenExpiredException(Constants.Jwt.JWT_REFRESH_TOKEN_EXPIRED);
         }
-        return generateToken(extractUsername(token));
+        return generateToken(extractUsername(token), extractDeviceId(token));
     }
 
-    public Boolean validateRefreshToken(String token) {
+    public Boolean validateRefreshToken(String token, UUID deviceId) {
         String username = extractUsername(token);
-        if (!isTokenExpired(token) && token.equals(encryptionService.getDecryptedToken(redisService.getRefreshToken(username)))) {
-            redisService.deleteRefreshToken(username);
+        if (!isTokenExpired(token) && token.equals(encryptionService.getDecryptedToken(redisService.getRefreshToken(username, deviceId)))) {
+            redisService.deleteRefreshToken(username, deviceId);
             return true;
+        }
+        return false;
+    }
+
+    public Boolean checkDeviceActiveForJwt(String token) {
+        UUID deviceId = extractDeviceId(token);
+        UserSession userSession = userSessionRepository.findByDeviceId(deviceId);
+        if (userSession != null) {
+            return userSession.isActive();
         }
         return false;
     }

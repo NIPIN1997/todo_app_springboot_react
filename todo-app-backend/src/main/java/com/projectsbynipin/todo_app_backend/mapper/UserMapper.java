@@ -1,11 +1,15 @@
 package com.projectsbynipin.todo_app_backend.mapper;
 
 import com.projectsbynipin.todo_app_backend.dto.AddUserRequestDto;
+import com.projectsbynipin.todo_app_backend.dto.LoggedInDevicesResponseDto;
 import com.projectsbynipin.todo_app_backend.dto.ViewUserResponseDto;
 import com.projectsbynipin.todo_app_backend.entity.Role;
 import com.projectsbynipin.todo_app_backend.entity.User;
+import com.projectsbynipin.todo_app_backend.entity.UserSession;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 @Component
 public class UserMapper {
@@ -28,5 +32,16 @@ public class UserMapper {
                 user.getEmail(),
                 user.getContact()
         );
+    }
+
+    public List<LoggedInDevicesResponseDto> userSessionsToLoggedInDevicesResponseDto(List<UserSession> userSessionList) {
+        return userSessionList.stream().map(
+                e -> new LoggedInDevicesResponseDto(
+                        e.getBrowser(),
+                        e.getOs(),
+                        e.getOsVersion(),
+                        e.getDeviceId()
+                )
+        ).toList();
     }
 }
