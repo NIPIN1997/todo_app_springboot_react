@@ -16,6 +16,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @Builder
 @Table(
+        schema = "user_schema",
         name = "user_sessions",
         indexes = {
                 @Index(name = "idx_device_id", columnList = "device_id")
@@ -46,4 +47,10 @@ public class UserSession {
     private LocalDateTime logoutTime;
     @Column(name = "is_active")
     private boolean isActive = true;
+    @Column(name = "remember_me")
+    private boolean rememberMe = false;
+    @Column(name = "remember_me_token", columnDefinition = "TEXT")
+    private String rememberMeToken;
+    @Column(name = "last_updated")
+    private LocalDateTime lastUpdated;
 }

@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(
+        schema = "user_schema",
         name = "roles",
         indexes = {
                 @Index(name = "idx_roles_name", columnList = "name")

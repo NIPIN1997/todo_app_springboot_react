@@ -80,4 +80,10 @@ public class UserController {
         ApiResponse<Void> apiResponse = userService.logoutDevices(UUID.fromString(logoutRequestDto.deviceId()), userInfoDetails);
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
+
+    @PostMapping(path = "/remember-me-login")
+    public ResponseEntity<ApiResponse<LoginResponseDto>> rememberMeLogin(@Valid @RequestBody RememberMeLoginRequestDto rememberMeLoginRequestDto, HttpServletRequest httpServletRequest) {
+        ApiResponse<LoginResponseDto> apiResponse = userService.rememberMeLogin(rememberMeLoginRequestDto, httpServletRequest);
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
 }

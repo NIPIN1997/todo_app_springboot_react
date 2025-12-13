@@ -1,4 +1,4 @@
-import { loginApi, tokenRefreshApi } from "../api/UserApi";
+import { loginApi, rememberMeLoginApi, tokenRefreshApi } from "../api/UserApi";
 import { useEffect, useRef, useState } from "react";
 import AuthContext from "../context/AuthContext.jsx";
 import { toast } from "react-toastify";
@@ -88,6 +88,41 @@ export const AuthProvider = ({ children }) => {
         sessionStorage.setItem("refreshToken", response.data.data.refreshToken);
         sessionStorage.setItem("isAuthenticated", true);
         localStorage.setItem("deviceId", response.data.data.deviceId);
+        if (response.data.data.rememberMeToken != null) {
+          localStorage.setItem(
+            "rememberMeToken",
+            response.data.data.rememberMeToken
+          );
+        }
+        return { success: true, message: null };
+      } else {
+        return { success: false, message: response.message };
+      }
+    } catch (error) {
+      const errorMessage =
+        error?.response?.data?.message ||
+        error?.message ||
+        "Login failed. Please try again.";
+      return { success: false, message: errorMessage };
+    }
+  };
+
+  const rememberMeLogin = async (data) => {
+    try {
+      const response = await rememberMeLoginApi(data);
+      if (response.data.status == "SUCCESS") {
+        setJwtToken(response.data.data.jwtToken);
+        setRefreshToken(response.data.data.refreshToken);
+        setDeviceId(response.data.data.deviceId);
+        setIsAuthenticated(true);
+        sessionStorage.setItem("jwtToken", response.data.data.jwtToken);
+        sessionStorage.setItem("refreshToken", response.data.data.refreshToken);
+        sessionStorage.setItem("isAuthenticated", true);
+        localStorage.setItem("deviceId", response.data.data.deviceId);
+        localStorage.setItem(
+          "rememberMeToken",
+          response.data.data.rememberMeToken
+        );
         return { success: true, message: null };
       } else {
         return { success: false, message: response.message };
@@ -105,6 +140,7 @@ export const AuthProvider = ({ children }) => {
     jwtToken,
     login,
     handleLogout,
+    rememberMeLogin,
     refreshToken,
     deviceId,
     isAuthenticated,

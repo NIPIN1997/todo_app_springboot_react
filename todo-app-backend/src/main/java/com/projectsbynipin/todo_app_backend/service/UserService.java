@@ -3,6 +3,7 @@ package com.projectsbynipin.todo_app_backend.service;
 import com.projectsbynipin.todo_app_backend.dto.*;
 import com.projectsbynipin.todo_app_backend.service.jwt.UserInfoDetails;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 
 import java.util.List;
 import java.util.UUID;
@@ -25,4 +26,6 @@ public interface UserService {
     ApiResponse<List<LoggedInDevicesResponseDto>> loggedInDevices(UUID userId, String username);
 
     ApiResponse<Void> logoutDevices(UUID deviceId, UserInfoDetails userInfoDetails);
+
+    ApiResponse<LoginResponseDto> rememberMeLogin(@Valid RememberMeLoginRequestDto rememberMeLoginRequestDto, HttpServletRequest httpServletRequest);
 }

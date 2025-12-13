@@ -6,6 +6,7 @@ export async function logout(jwtToken) {
   sessionStorage.removeItem("refreshToken");
   sessionStorage.removeItem("isAuthenticated");
   const deviceId = localStorage.getItem("deviceId");
+  localStorage.removeItem("deviceId");
   try {
     await logoutApi(jwtToken, deviceId);
   } catch (error) {

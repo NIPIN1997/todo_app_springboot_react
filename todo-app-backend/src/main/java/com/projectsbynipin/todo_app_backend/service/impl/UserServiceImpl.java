@@ -118,6 +118,11 @@ public class UserServiceImpl implements UserService {
                 userSession.setOs(client.os.family);
                 userSession.setOsVersion(client.os.major);
                 userSession.setFingerprint(hashingService.hashDeviceId(client, userSession.getDeviceId()));
+                userSession.setLastUpdated(LocalDateTime.now());
+                if (loginRequestDto.rememberMe()) {
+                    userSession.setRememberMe(true);
+                    userSession.setRememberMeToken(jwtService.generateRememberMeToken(loginRequestDto.email(), deviceId));
+                }
                 UserSession session = null;
                 try {
                     session = userSessionRepository.save(userSession);
@@ -125,7 +130,7 @@ public class UserServiceImpl implements UserService {
                 } catch (Exception e) {
                     throw new LoginFailedException(Constants.Login.LOGIN_FAILED);
                 }
-                return ApiResponseCreator.success(Constants.Login.LOGIN_SUCCESSFUL, new LoginResponseDto(jwtToken, jwtRefreshToken, session.getDeviceId().toString()), HttpStatus.OK);
+                return ApiResponseCreator.success(Constants.Login.LOGIN_SUCCESSFUL, new LoginResponseDto(jwtToken, jwtRefreshToken, session.getDeviceId().toString(), session.getRememberMeToken()), HttpStatus.OK);
             } else {
                 logger.error("Failed login attempt -> Email : {}", loginRequestDto.email());
                 throw new LoginFailedException(Constants.Login.LOGIN_DEVICE_LIMIT_REACHED);
@@ -166,7 +171,7 @@ public class UserServiceImpl implements UserService {
                 String jwtToken = jwtService.generateToken(username, deviceID);
                 String jwtRefreshToken = jwtService.generateRefreshToken(username, deviceID);
                 redisService.storeRefreshToken(username, userSession.getDeviceId(), encryptionService.getEncryptedToken(jwtRefreshToken));
-                return ApiResponseCreator.success(Constants.Login.LOGIN_SUCCESSFUL, new LoginResponseDto(jwtToken, jwtRefreshToken, null), HttpStatus.OK);
+                return ApiResponseCreator.success(Constants.Login.LOGIN_SUCCESSFUL, new LoginResponseDto(jwtToken, jwtRefreshToken, null, null), HttpStatus.OK);
             } else {
                 logger.error("Failed to issue refresh token -> Email : {}", username);
                 redisService.deleteRefreshToken(username, userSession.getDeviceId());
@@ -260,6 +265,7 @@ public class UserServiceImpl implements UserService {
                 throw new AccessDeniedException(Constants.Miscellaneous.ACCESS_DENIED);
             }
             userSession.setActive(false);
+            userSession.setLogoutTime(LocalDateTime.now());
             userSessionRepository.save(userSession);
             redisService.deleteRefreshToken(userInfoDetails.getUsername(), deviceId);
             return ApiResponseCreator.success(Constants.Login.DEVICE_LOGGED_OUT, HttpStatus.OK);
@@ -268,4 +274,36 @@ public class UserServiceImpl implements UserService {
             throw new FailedToLogoutDeviceException(Constants.Login.DEVICE_LOG_OUT_FAILED);
         }
     }
+
+    @Override
+    public ApiResponse<LoginResponseDto> rememberMeLogin(RememberMeLoginRequestDto rememberMeLoginRequestDto, HttpServletRequest httpServletRequest) {
+        try {
+            UserSession userSession = userSessionRepository.findByDeviceId(UUID.fromString(rememberMeLoginRequestDto.deviceId()));
+            Parser parser = new Parser();
+            Client client = parser.parse(httpServletRequest.getHeader("User-Agent"));
+            String fingerprint = hashingService.hashDeviceId(client, UUID.fromString(rememberMeLoginRequestDto.deviceId()));
+            if (userSession == null) {
+                throw new LoginFailedException(Constants.Login.LOGIN_FAILED);
+            }
+            if (!jwtService.isTokenExpired(userSession.getRememberMeToken()) && userSession.getRememberMeToken().equals(rememberMeLoginRequestDto.rememberMeToken()) && userSession.getFingerprint().equals(fingerprint) && userSession.isActive()) {
+                User user = userRepository.findById(userSession.getUserId()).orElseThrow(() -> new UserNotFoundException(Constants.User.USER_NOT_FOUND));
+                String jwtToken = jwtService.generateToken(user.getEmail(), UUID.fromString(rememberMeLoginRequestDto.deviceId()));
+                String jwtRefreshToken = jwtService.generateRefreshToken(user.getEmail(), UUID.fromString(rememberMeLoginRequestDto.deviceId()));
+                userSession.setLastUpdated(LocalDateTime.now());
+                String rememberMeToken = jwtService.generateRememberMeToken(user.getEmail(), UUID.fromString(rememberMeLoginRequestDto.deviceId()));
+                userSession.setRememberMeToken(rememberMeToken);
+                userSessionRepository.save(userSession);
+                redisService.storeRefreshToken(user.getEmail(), userSession.getDeviceId(), encryptionService.getEncryptedToken(jwtRefreshToken));
+                logger.info("Login -> User ID: {} , email : {}.", user.getId(), user.getEmail());
+                return ApiResponseCreator.success(Constants.Login.LOGIN_SUCCESSFUL, new LoginResponseDto(jwtToken, jwtRefreshToken, userSession.getDeviceId().toString(), rememberMeToken), HttpStatus.OK);
+            } else {
+                logger.error("Failed login attempt");
+                throw new LoginFailedException(Constants.Login.LOGIN_FAILED);
+            }
+        } catch (Exception e) {
+            logger.error("Failed login attempt: {}", e.getMessage());
+            throw new LoginFailedException(Constants.Login.LOGIN_FAILED);
+        }
+    }
+
 }

@@ -18,7 +18,7 @@ public class RedisService {
 
     public void storeRefreshToken(String username, UUID deviceId, String encryptedRefreshToken) {
         String key = Constants.Redis.REDIS_KEY_PREFIX + username + deviceId;
-        redisTemplate.opsForValue().set(key, encryptedRefreshToken, Duration.ofHours(1));
+        redisTemplate.opsForValue().set(key, encryptedRefreshToken, Duration.ofMinutes(10));
     }
 
     public String getRefreshToken(String username, UUID deviceId) {

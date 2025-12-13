@@ -34,6 +34,8 @@ public class JwtService {
     private long jwtTokenExpiration;
     @Value("${security.jwt.refresh-token-expiration-time}")
     private long jwtRefreshTokenExpiration;
+    @Value("${security.jwt.remember-me-token-expiration-time}")
+    private long jwtRememberMeTokenExpiration;
 
     private final UserRepository userRepository;
     private final RedisService redisService;
@@ -76,6 +78,10 @@ public class JwtService {
 
     public String generateRefreshToken(String email, UUID deviceId) {
         return createToken(email, jwtRefreshTokenExpiration, deviceId);
+    }
+
+    public String generateRememberMeToken(String email, UUID deviceId) {
+        return createToken(email, jwtRememberMeTokenExpiration, deviceId);
     }
 
     private Claims extractAllClaims(String token) {

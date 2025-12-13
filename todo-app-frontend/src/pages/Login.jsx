@@ -4,22 +4,45 @@ import Col from "react-bootstrap/Col";
 import Form from "react-bootstrap/Form";
 import Row from "react-bootstrap/Row";
 import styles from "../styles/login.module.css";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useAuth } from "../hooks/UseAuth.jsx";
 import { toast } from "react-toastify";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 export function Login() {
   const [data, setData] = useState({});
-  const { login } = useAuth();
+  const { login, rememberMeLogin } = useAuth();
   const navigate = useNavigate();
+  const rememberMeLoginCheck = async () => {
+    if (
+      localStorage.getItem("rememberMeToken") != null &&
+      localStorage.getItem("deviceId") != null
+    ) {
+      const payload = {
+        rememberMeToken: localStorage.getItem("rememberMeToken"),
+        deviceId: localStorage.getItem("deviceId"),
+      };
+      const { success } = await rememberMeLogin(payload);
+      if (success) {
+        navigate("/home");
+      }
+    }
+  };
+  useEffect(() => {
+    rememberMeLoginCheck();
+  }, []);
   const handleChange = (e) => {
     setData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
+  const [rememberMe, setRememberMe] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const { success, message } = await login(data);
+    const payload = {
+      ...data,
+      rememberMe: rememberMe,
+    };
+    const { success, message } = await login(payload);
     if (success) {
       navigate("/home");
     } else {
@@ -44,6 +67,8 @@ export function Login() {
                 id="email"
                 name="email"
                 required
+                pattern="[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,}$"
+                title="Please enter valid email id."
                 onChange={handleChange}
               />
             </Col>
@@ -61,6 +86,22 @@ export function Login() {
                 required
                 onChange={handleChange}
               />
+            </Col>
+          </Form.Group>
+          <Form.Group as={Row} className="mt-3">
+            <Col sm="6" className={styles.remember_me_switch}>
+              <Form.Check
+                type="checkbox"
+                id="rememberMe"
+                checked={rememberMe}
+                label="Remember me"
+                onChange={(e) => setRememberMe(e.target.checked)}
+              />
+            </Col>
+            <Col sm="6" className={styles.sign_up}>
+              <Link to="/signup" className={styles.sign_up_link}>
+                New user ? Sign up
+              </Link>
             </Col>
           </Form.Group>
           <div className={styles.submit_button_division}>

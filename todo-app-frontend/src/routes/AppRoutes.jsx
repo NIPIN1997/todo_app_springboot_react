@@ -4,11 +4,13 @@ import { Home } from "../pages/Home";
 import { ProtectedRoute } from "../components/ProtectedRoute.jsx";
 import { MyAccount } from "../pages/MyAccount.jsx";
 import { Devices } from "../pages/Devices.jsx";
+import { Signup } from "../pages/Signup.jsx";
 
 export function AppRoutes() {
   return (
     <Routes>
       <Route path="/" element={<Login />} />
+      <Route path="/signup" element={<Signup />} />
       <Route
         path="/home"
         element={

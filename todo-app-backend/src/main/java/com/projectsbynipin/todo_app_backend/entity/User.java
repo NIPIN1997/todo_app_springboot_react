@@ -15,6 +15,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(
+        schema = "user_schema",
         name = "users",
         indexes = {
                 @Index(name = "idx_users_name", columnList = "name"),

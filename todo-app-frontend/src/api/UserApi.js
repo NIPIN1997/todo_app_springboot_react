@@ -93,3 +93,13 @@ export const deviceLogoutApi = async (jwtToken, deviceId) => {
   );
   return response;
 };
+
+export const rememberMeLoginApi = async (data) => {
+  const response = await api.post(`/remember-me-login`, data);
+  return response;
+};
+
+export const signupApi = async (data) => {
+  const response = await api.post(`/signup`, data);
+  return response;
+};
