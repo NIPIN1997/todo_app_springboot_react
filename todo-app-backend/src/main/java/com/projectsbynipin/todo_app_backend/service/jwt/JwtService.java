@@ -2,7 +2,6 @@ package com.projectsbynipin.todo_app_backend.service.jwt;
 
 import com.projectsbynipin.todo_app_backend.entity.User;
 import com.projectsbynipin.todo_app_backend.entity.UserSession;
-import com.projectsbynipin.todo_app_backend.exception.JwtRefreshTokenExpiredException;
 import com.projectsbynipin.todo_app_backend.exception.UserNotFoundException;
 import com.projectsbynipin.todo_app_backend.repository.UserRepository;
 import com.projectsbynipin.todo_app_backend.repository.UserSessionRepository;
@@ -30,6 +29,10 @@ public class JwtService {
 
     @Value("${security.jwt.secret-key}")
     private String jwtSecretKey;
+    @Value("${security.jwt.refresh-token-secret-key}")
+    private String refreshTokenSecretKey;
+    @Value("${security.jwt.remember-me-token-secret-key}")
+    private String rememberMeTokenSecretKey;
     @Value("${security.jwt.token-expiration-time}")
     private long jwtTokenExpiration;
     @Value("${security.jwt.refresh-token-expiration-time}")
@@ -49,12 +52,12 @@ public class JwtService {
         this.userSessionRepository = userSessionRepository;
     }
 
-    private Key getSignkey() {
-        byte[] bytes = Decoders.BASE64.decode(jwtSecretKey);
+    private Key getSignkey(String secretKey) {
+        byte[] bytes = Decoders.BASE64.decode(secretKey);
         return Keys.hmacShaKeyFor(bytes);
     }
 
-    private String createToken(String email, long expirationTime, UUID deviceId) {
+    private String createToken(String email, long expirationTime, UUID deviceId, String secretKey) {
         User user = userRepository.findByEmailAndIsDeleted(email, false);
         if (user == null) {
             throw new UserNotFoundException(Constants.User.USER_NOT_FOUND);
@@ -68,70 +71,67 @@ public class JwtService {
                 .subject(email)
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + expirationTime))
-                .signWith(getSignkey())
+                .signWith(getSignkey(secretKey))
                 .compact();
     }
 
     public String generateToken(String email, UUID deviceId) {
-        return createToken(email, jwtTokenExpiration, deviceId);
+        return createToken(email, jwtTokenExpiration, deviceId, jwtSecretKey);
     }
 
     public String generateRefreshToken(String email, UUID deviceId) {
-        return createToken(email, jwtRefreshTokenExpiration, deviceId);
+        return createToken(email, jwtRefreshTokenExpiration, deviceId, refreshTokenSecretKey);
     }
 
     public String generateRememberMeToken(String email, UUID deviceId) {
-        return createToken(email, jwtRememberMeTokenExpiration, deviceId);
+        return createToken(email, jwtRememberMeTokenExpiration, deviceId, rememberMeTokenSecretKey);
     }
 
-    private Claims extractAllClaims(String token) {
+    private Claims extractAllClaims(String token, String secretKey) {
         return Jwts.parser()
-                .verifyWith((SecretKey) getSignkey())
+                .verifyWith((SecretKey) getSignkey(secretKey))
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();
     }
 
-    public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
-        final Claims claims = extractAllClaims(token);
+    public <T> T extractClaim(String token, String secretKey, Function<Claims, T> claimsResolver) {
+        final Claims claims = extractAllClaims(token, secretKey);
         return claimsResolver.apply(claims);
     }
 
-    public String extractUsername(String token) {
-        return extractClaim(token, Claims::getSubject);
+    public String extractUsername(String token, String secretKey) {
+        return extractClaim(token, secretKey, Claims::getSubject);
     }
 
-    public Date extractExpiration(String token) {
-        return extractClaim(token, Claims::getExpiration);
+    public Date extractExpiration(String token, String secretKey) {
+        return extractClaim(token, secretKey, Claims::getExpiration);
     }
 
     public UUID extractDeviceId(String token) {
-        return UUID.fromString(extractAllClaims(token).get("deviceId", String.class));
+        return UUID.fromString(extractAllClaims(token, jwtSecretKey).get("deviceId", String.class));
     }
 
-    public boolean isTokenExpired(String token) {
-        return extractExpiration(token).before(new Date());
+    public boolean isTokenExpired(String token, String secretKey) {
+        return extractExpiration(token, secretKey).before(new Date());
     }
 
     public Boolean validateToken(String token, UserDetails userDetails) {
-        final String username = extractUsername(token);
-        return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
-    }
-
-    public String refreshToken(String token) {
-        if (isTokenExpired(token)) {
-            throw new JwtRefreshTokenExpiredException(Constants.Jwt.JWT_REFRESH_TOKEN_EXPIRED);
-        }
-        return generateToken(extractUsername(token), extractDeviceId(token));
+        final String username = extractUsername(token, jwtSecretKey);
+        return (username.equals(userDetails.getUsername()) && !isTokenExpired(token, jwtSecretKey));
     }
 
     public Boolean validateRefreshToken(String token, UUID deviceId) {
-        String username = extractUsername(token);
-        if (!isTokenExpired(token) && token.equals(encryptionService.getDecryptedToken(redisService.getRefreshToken(username, deviceId)))) {
+        String username = extractUsername(token, refreshTokenSecretKey);
+        if (!isTokenExpired(token, refreshTokenSecretKey) && token.equals(encryptionService.getDecryptedToken(redisService.getRefreshToken(username, deviceId)))) {
             redisService.deleteRefreshToken(username, deviceId);
             return true;
         }
         return false;
+    }
+
+    public boolean isRememberMeTokenExpired(String token) {
+        return extractExpiration(token, rememberMeTokenSecretKey).before(new Date());
     }
 
     public Boolean checkDeviceActiveForJwt(String token) {

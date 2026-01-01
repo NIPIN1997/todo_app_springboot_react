@@ -20,6 +20,7 @@ import com.projectsbynipin.todo_app_backend.utility.Constants;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -46,6 +47,8 @@ public class UserServiceImpl implements UserService {
     private final EncryptionService encryptionService;
     private final UserSessionRepository userSessionRepository;
     private final HashingService hashingService;
+    @Value("${security.jwt.refresh-token-secret-key}")
+    private String refreshTokenSecretKey;
 
     private final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
 
@@ -162,7 +165,7 @@ public class UserServiceImpl implements UserService {
         UserSession userSession = userSessionRepository.findByDeviceId(deviceID);
         Parser parser = new Parser();
         Client client = parser.parse(httpServletRequest.getHeader("User-Agent"));
-        String username = jwtService.extractUsername(refreshTokenRequestDto.refreshToken());
+        String username = jwtService.extractUsername(refreshTokenRequestDto.refreshToken(), refreshTokenSecretKey);
         if (userSession != null && userSession.isActive() && userSession.getFingerprint().equals(hashingService.hashDeviceId(client, deviceID))) {
             boolean isValid = jwtService.validateRefreshToken(refreshTokenRequestDto.refreshToken(), userSession.getDeviceId());
             if (isValid) {
@@ -285,7 +288,7 @@ public class UserServiceImpl implements UserService {
             if (userSession == null) {
                 throw new LoginFailedException(Constants.Login.LOGIN_FAILED);
             }
-            if (!jwtService.isTokenExpired(userSession.getRememberMeToken()) && userSession.getRememberMeToken().equals(rememberMeLoginRequestDto.rememberMeToken()) && userSession.getFingerprint().equals(fingerprint) && userSession.isActive()) {
+            if (!jwtService.isRememberMeTokenExpired(userSession.getRememberMeToken()) && userSession.getRememberMeToken().equals(rememberMeLoginRequestDto.rememberMeToken()) && userSession.getFingerprint().equals(fingerprint) && userSession.isActive()) {
                 User user = userRepository.findById(userSession.getUserId()).orElseThrow(() -> new UserNotFoundException(Constants.User.USER_NOT_FOUND));
                 String jwtToken = jwtService.generateToken(user.getEmail(), UUID.fromString(rememberMeLoginRequestDto.deviceId()));
                 String jwtRefreshToken = jwtService.generateRefreshToken(user.getEmail(), UUID.fromString(rememberMeLoginRequestDto.deviceId()));

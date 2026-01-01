@@ -5,7 +5,8 @@ export async function logout(jwtToken) {
   sessionStorage.removeItem("jwtToken");
   sessionStorage.removeItem("refreshToken");
   sessionStorage.removeItem("isAuthenticated");
-  const deviceId = localStorage.getItem("deviceId");
+  const deviceId = sessionStorage.getItem("deviceId");
+  sessionStorage.removeItem("deviceId");
   localStorage.removeItem("deviceId");
   try {
     await logoutApi(jwtToken, deviceId);
@@ -22,6 +23,7 @@ export async function forcedLogout() {
     sessionStorage.removeItem("jwtToken");
     sessionStorage.removeItem("refreshToken");
     sessionStorage.removeItem("isAuthenticated");
+    sessionStorage.removeItem("deviceId");
     localStorage.removeItem("deviceId");
     window.location.href = "/";
   }, 3000);

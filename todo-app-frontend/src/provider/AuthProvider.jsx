@@ -14,9 +14,15 @@ export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(() =>
     sessionStorage.getItem("isAuthenticated")
   );
-  const [deviceId, setDeviceId] = useState(() =>
-    localStorage.getItem("deviceId")
-  );
+  const [deviceId, setDeviceId] = useState(() => {
+    if (sessionStorage.getItem("deviceId")) {
+      return sessionStorage.getItem("deviceId");
+    } else if (localStorage.getItem("deviceId")) {
+      return localStorage.getItem("deviceId");
+    } else {
+      return null;
+    }
+  });
 
   const intervalReference = useRef();
   const jwtTokenReference = useRef(jwtToken);
@@ -87,12 +93,13 @@ export const AuthProvider = ({ children }) => {
         sessionStorage.setItem("jwtToken", response.data.data.jwtToken);
         sessionStorage.setItem("refreshToken", response.data.data.refreshToken);
         sessionStorage.setItem("isAuthenticated", true);
-        localStorage.setItem("deviceId", response.data.data.deviceId);
+        sessionStorage.setItem("deviceId", response.data.data.deviceId);
         if (response.data.data.rememberMeToken != null) {
           localStorage.setItem(
             "rememberMeToken",
             response.data.data.rememberMeToken
           );
+          localStorage.setItem("deviceId", response.data.data.deviceId);
         }
         return { success: true, message: null };
       } else {
@@ -118,6 +125,7 @@ export const AuthProvider = ({ children }) => {
         sessionStorage.setItem("jwtToken", response.data.data.jwtToken);
         sessionStorage.setItem("refreshToken", response.data.data.refreshToken);
         sessionStorage.setItem("isAuthenticated", true);
+        sessionStorage.setItem("deviceId", response.data.data.deviceId);
         localStorage.setItem("deviceId", response.data.data.deviceId);
         localStorage.setItem(
           "rememberMeToken",
