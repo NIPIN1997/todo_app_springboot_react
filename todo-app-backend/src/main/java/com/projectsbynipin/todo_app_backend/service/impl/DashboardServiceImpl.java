@@ -287,11 +287,11 @@ public class DashboardServiceImpl implements DashboardService {
         User user = findUserByEmailAndDeleted(userInfoDetails.getUsername());
         Dashboard dashboard = findDashboardById(addDashboardMemberRequestDto.dashboardId());
         if (dashboard.getMaster().equals(user)) {
+            User userToBeAdded = userRepository.findByEmailAndDeleted(addDashboardMemberRequestDto.username(), false);
+            if (userToBeAdded == null) {
+                throw new FailedToAddDashboardMemberException(Constants.User.USERNAME_DOESNOT_EXIST);
+            }
             try {
-                User userToBeAdded = userRepository.findByEmailAndDeleted(addDashboardMemberRequestDto.username(), false);
-                if (userToBeAdded == null) {
-                    throw new FailedToAddDashboardMemberException(Constants.User.USERNAME_DOESNOT_EXIST);
-                }
                 Set<UUID> memberIds = new HashSet<>();
                 memberIds.add(userToBeAdded.getId());
                 invitationService.createInvitations(memberIds, dashboard.getId());

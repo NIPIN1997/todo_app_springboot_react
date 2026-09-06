@@ -3,9 +3,12 @@ import { forcedLogout } from "../utils/logout";
 import { toast } from "react-toastify";
 
 const BASE_URL = import.meta.env.VITE_BACKEND_BASE_URL;
-const BASE_URL_USERS = `${BASE_URL}/api/v1/users`;
+const BASE_URL_TASK = `${BASE_URL}/api/v1/task`;
 
-export const api = axios.create({ baseURL: BASE_URL_USERS });
+export const api = axios.create({
+  baseURL: BASE_URL_TASK,
+  withCredentials: true,
+});
 
 api.interceptors.response.use(
   (response) => response,
@@ -17,7 +20,7 @@ api.interceptors.response.use(
       } else if (status >= 400 && status < 500) {
         toast.error(error.response.data?.message || "An error has occured");
       } else if (status >= 500) {
-        toast.error("Internal server error");
+        toast.error(error.response.data?.message || "Internal server error");
       } else if (error.request) {
         toast.error("Network error");
       } else {

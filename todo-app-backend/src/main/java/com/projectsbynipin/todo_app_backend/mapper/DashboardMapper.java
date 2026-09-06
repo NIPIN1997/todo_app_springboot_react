@@ -89,7 +89,7 @@ public class DashboardMapper {
         Set<User> users = dashboard.getUsers();
         List<DashboardColumn> dashboardColumns = dashboard.getColumns();
         List<EditDashboardViewDto.EditDashboardMember> members = users.stream().filter(e -> !e.getId().equals(dashboard.getMaster().getId())).map(e -> new EditDashboardViewDto.EditDashboardMember(e.getId(), e.getName())).toList();
-        List<EditDashboardViewDto.EditDashboardColumn> columns = dashboardColumns.stream().map(e -> new EditDashboardViewDto.EditDashboardColumn(e.getId(), e.getName(), e.getPosition())).toList();
+        List<EditDashboardViewDto.EditDashboardColumn> columns = dashboardColumns.stream().sorted(Comparator.comparingLong(DashboardColumn::getPosition)).map(e -> new EditDashboardViewDto.EditDashboardColumn(e.getId(), e.getName(), e.getPosition())).toList();
         return new EditDashboardViewDto(
                 dashboard.getId(),
                 dashboard.getName(),

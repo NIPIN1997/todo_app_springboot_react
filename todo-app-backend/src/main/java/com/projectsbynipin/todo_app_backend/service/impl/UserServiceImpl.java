@@ -99,7 +99,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public ApiResponse<LoginResponseDto> login(LoginRequestDto loginRequestDto, HttpServletRequest httpServletRequest) {
+    public JwtTokensDto login(LoginRequestDto loginRequestDto, HttpServletRequest httpServletRequest) {
         if (redisService.checkIfUserLockedOut(loginRequestDto.email())) {
             throw new FailedLoginRateLimitReachedException(Constants.Login.FAILED_LOGIN_LIMIT_REACHED + redisService.getRemainingLoginLockoutTime(loginRequestDto.email()));
         }
@@ -154,7 +154,7 @@ public class UserServiceImpl implements UserService {
                                 .time(LocalDateTime.now())
                                 .build()
                 );
-                return ApiResponseCreator.success(Constants.Login.LOGIN_SUCCESSFUL, new LoginResponseDto(jwtToken, jwtRefreshToken, session.getDeviceId().toString(), session.getRememberMeToken()), HttpStatus.OK);
+                return new JwtTokensDto(jwtToken, jwtRefreshToken, session.getRememberMeToken(), session.getDeviceId().toString());
             } else {
                 throw new LoginFailedException(Constants.Login.LOGIN_DEVICE_LIMIT_REACHED);
             }
@@ -170,7 +170,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public ApiResponse<LoginResponseDto> refreshToken(RefreshTokenRequestDto refreshTokenRequestDto, HttpServletRequest httpServletRequest) {
+    public JwtTokensDto refreshToken(RefreshTokenRequestDto refreshTokenRequestDto, HttpServletRequest httpServletRequest) {
         UUID deviceID = UUID.fromString(refreshTokenRequestDto.deviceId());
         UserSession userSession = userSessionRepository.findByDeviceId(deviceID);
         Parser parser = new Parser();
@@ -190,7 +190,7 @@ public class UserServiceImpl implements UserService {
                                 .time(LocalDateTime.now())
                                 .build()
                 );
-                return ApiResponseCreator.success(Constants.Login.LOGIN_SUCCESSFUL, new LoginResponseDto(jwtToken, jwtRefreshToken, null, null), HttpStatus.OK);
+                return new JwtTokensDto(jwtToken, jwtRefreshToken, null, deviceID.toString());
             } else {
                 redisService.deleteRefreshToken(username, userSession.getDeviceId());
                 userSession.setActive(false);
@@ -283,7 +283,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public ApiResponse<LoginResponseDto> rememberMeLogin(RememberMeLoginRequestDto rememberMeLoginRequestDto, HttpServletRequest httpServletRequest) {
+    public JwtTokensDto rememberMeLogin(RememberMeLoginRequestDto rememberMeLoginRequestDto, HttpServletRequest httpServletRequest) {
         try {
             UserSession userSession = userSessionRepository.findByDeviceId(UUID.fromString(rememberMeLoginRequestDto.deviceId()));
             Parser parser = new Parser();
@@ -301,7 +301,7 @@ public class UserServiceImpl implements UserService {
                 userSession.setRememberMeToken(rememberMeToken);
                 userSessionRepository.save(userSession);
                 redisService.storeRefreshToken(user.getEmail(), userSession.getDeviceId(), encryptionService.getEncryptedToken(jwtRefreshToken));
-                return ApiResponseCreator.success(Constants.Login.LOGIN_SUCCESSFUL, new LoginResponseDto(jwtToken, jwtRefreshToken, userSession.getDeviceId().toString(), rememberMeToken), HttpStatus.OK);
+                return new JwtTokensDto(jwtToken, jwtRefreshToken, rememberMeToken, userSession.getDeviceId().toString());
             } else {
                 throw new LoginFailedException(Constants.Login.LOGIN_FAILED);
             }

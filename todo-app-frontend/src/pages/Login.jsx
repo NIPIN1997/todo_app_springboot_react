@@ -14,14 +14,9 @@ export function Login() {
   const navigate = useNavigate();
   const rememberMeLoginCheck = async () => {
     if (
-      localStorage.getItem("rememberMeToken") != null &&
-      localStorage.getItem("deviceId") != null
+      localStorage.getItem("rememberMeEnabled")
     ) {
-      const payload = {
-        rememberMeToken: localStorage.getItem("rememberMeToken"),
-        deviceId: localStorage.getItem("deviceId"),
-      };
-      const { success } = await rememberMeLogin(payload);
+      const { success } = await rememberMeLogin();
       if (success) {
         navigate("/home");
       }

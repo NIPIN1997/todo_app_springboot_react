@@ -40,4 +40,5 @@ public interface DashboardService {
     ApiResponse<Void> promoteDashboardMember(@Valid PromoteDashboardMemberRequestDto promoteDashboardMemberRequestDto, UserInfoDetails userInfoDetails);
 
     ApiResponse<Void> addDashboardMember(@Valid AddDashboardMemberRequestDto addDashboardMemberRequestDto, UserInfoDetails userInfoDetails);
+
 }

@@ -1,12 +1,14 @@
 import axios from "axios";
 import { forcedLogout } from "../utils/logout";
 import { toast } from "react-toastify";
-import { jwtDecode } from "jwt-decode";
 
 const BASE_URL = import.meta.env.VITE_BACKEND_BASE_URL;
-const BASE_URL_USERS = `${BASE_URL}/api/v1/users`;
+const BASE_URL_DASHBOARD = `${BASE_URL}/api/v1/dashboard`;
 
-export const api = axios.create({ baseURL: BASE_URL_USERS });
+export const api = axios.create({
+  baseURL: BASE_URL_DASHBOARD,
+  withCredentials: true,
+});
 
 api.interceptors.response.use(
   (response) => response,
@@ -18,7 +20,7 @@ api.interceptors.response.use(
       } else if (status >= 400 && status < 500) {
         toast.error(error.response.data?.message || "An error has occured");
       } else if (status >= 500) {
-        toast.error("Internal server error");
+        toast.error(error.response.data?.message || "Internal server error");
       } else if (error.request) {
         toast.error("Network error");
       } else {
@@ -172,6 +174,15 @@ export const promoteDashboardMember = async (jwtToken, data) => {
 
 export const addDashboardMemberAPi = async (jwtToken, data) => {
   const response = await api.post(`/add-dashboard-member`, data, {
+    headers: {
+      Authorization: `Bearer ${jwtToken}`,
+    },
+  });
+  return response;
+};
+
+export const editDashboardColumnName = async (jwtToken, data) => {
+  const response = await api.put(`/edit-dashboard-column-name`, data, {
     headers: {
       Authorization: `Bearer ${jwtToken}`,
     },

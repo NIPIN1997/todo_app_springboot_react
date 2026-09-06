@@ -80,7 +80,8 @@ public class GlobalExceptionHandler {
                     FailedToUnarchiveDashboardException.class,
                     FailedToEditDashboardException.class,
                     FailedToRemoveDashboardMemberException.class,
-                    FailedToAddDashboardMemberException.class
+                    FailedToAddDashboardMemberException.class,
+                    FailedToEditDashboardColumnNameException.class
             }
     )
     public ResponseEntity<ApiResponse<Void>> handleInternalServerErrors(RuntimeException ex) {

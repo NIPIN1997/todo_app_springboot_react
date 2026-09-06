@@ -13,11 +13,11 @@ public interface UserService {
 
     ApiResponse<Void> createUser(AddUserRequestDto addUserRequestDto);
 
-    ApiResponse<LoginResponseDto> login(LoginRequestDto loginRequestDto, HttpServletRequest httpServletRequest);
+    JwtTokensDto login(LoginRequestDto loginRequestDto, HttpServletRequest httpServletRequest);
 
     ApiResponse<ViewUserResponseDto> getUser(UserInfoDetails userInfoDetails);
 
-    ApiResponse<LoginResponseDto> refreshToken(RefreshTokenRequestDto refreshTokenRequestDto, HttpServletRequest httpServletRequest);
+    JwtTokensDto refreshToken(RefreshTokenRequestDto refreshTokenRequestDto, HttpServletRequest httpServletRequest);
 
     ApiResponse<Void> editUser(EditUserRequestDto editUserRequestDto, UserInfoDetails userInfoDetails);
 
@@ -27,7 +27,7 @@ public interface UserService {
 
     ApiResponse<Void> logoutDevices(UUID deviceId, UserInfoDetails userInfoDetails);
 
-    ApiResponse<LoginResponseDto> rememberMeLogin(@Valid RememberMeLoginRequestDto rememberMeLoginRequestDto, HttpServletRequest httpServletRequest);
+    JwtTokensDto rememberMeLogin(@Valid RememberMeLoginRequestDto rememberMeLoginRequestDto, HttpServletRequest httpServletRequest);
 
     ApiResponse<String> checkUsernameExistence(String username, UserInfoDetails userInfoDetails);
 }

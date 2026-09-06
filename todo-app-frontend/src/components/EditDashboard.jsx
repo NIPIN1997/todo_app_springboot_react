@@ -3,6 +3,7 @@ import Modal from "react-bootstrap/Modal";
 import Table from "react-bootstrap/Table";
 import {
   addDashboardMemberAPi,
+  editDashboardColumnName,
   editDashboardNameApi,
   getDashboardDetailsForEdit,
   promoteDashboardMember,
@@ -65,9 +66,23 @@ export function EditDashboard({ dashboardId, show, onHide, ...props }) {
       dashboardId: dashboardId,
       username: addMemberUsername,
     };
-    await addDashboardMemberAPi(jwtToken, data);
-    toast.success("Invitation sent to user.");
-    setAddMemberUsername(null);
+    try {
+      await addDashboardMemberAPi(jwtToken, data);
+      toast.success("Invitation sent to user.");
+    } finally {
+      setAddMemberUsername("");
+      getDashboardDetails();
+    }
+  };
+  const editColumnName = async () => {
+    const data = {
+      columnID: editingColumnId,
+      columnName: editingColumnName,
+    };
+    await editDashboardColumnName(jwtToken, data);
+    toast.success("Column name edited.");
+    setEditingColumnId(null);
+    setEditingColumnName(null);
     getDashboardDetails();
   };
   useEffect(() => {
@@ -315,6 +330,9 @@ export function EditDashboard({ dashboardId, show, onHide, ...props }) {
                             variant="outline-success"
                             className="me-1 fw-bold"
                             size="sm"
+                            onClick={() => {
+                              editColumnName();
+                            }}
                           >
                             <svg
                               xmlns="http://www.w3.org/2000/svg"

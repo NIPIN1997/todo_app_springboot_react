@@ -6,43 +6,25 @@ import { logout } from "../utils/logout.js";
 
 export const AuthProvider = ({ children }) => {
   const [jwtToken, setJwtToken] = useState(() =>
-    sessionStorage.getItem("jwtToken")
-  );
-  const [refreshToken, setRefreshToken] = useState(() =>
-    sessionStorage.getItem("refreshToken")
+    sessionStorage.getItem("jwtToken"),
   );
   const [isAuthenticated, setIsAuthenticated] = useState(() =>
-    sessionStorage.getItem("isAuthenticated")
+    sessionStorage.getItem("isAuthenticated"),
   );
-  const [deviceId, setDeviceId] = useState(() => {
-    if (sessionStorage.getItem("deviceId")) {
-      return sessionStorage.getItem("deviceId");
-    } else if (localStorage.getItem("deviceId")) {
-      return localStorage.getItem("deviceId");
-    } else {
-      return null;
-    }
-  });
-
   const intervalReference = useRef();
   const jwtTokenReference = useRef(jwtToken);
-  const refreshTokenReference = useRef(refreshToken);
-  const deviceIdReference = useRef(deviceId);
 
   useEffect(() => {
     jwtTokenReference.current = jwtToken;
-    refreshTokenReference.current = refreshToken;
-    deviceIdReference.current = deviceId;
-  }, [jwtToken, refreshToken, deviceId]);
+  }, [jwtToken]);
 
   const handleLogout = () => {
     if (intervalReference.current) {
       clearInterval(intervalReference.current);
     }
     setJwtToken(null);
-    setRefreshToken(null);
     setIsAuthenticated(false);
-    setDeviceId(null);
+    localStorage.removeItem("rememberMeEnabled");
     logout(jwtToken);
   };
 
@@ -55,20 +37,11 @@ export const AuthProvider = ({ children }) => {
     }
     intervalReference.current = setInterval(async () => {
       try {
-        const response = await tokenRefreshApi(
-          jwtTokenReference.current,
-          refreshTokenReference.current,
-          deviceIdReference.current
-        );
+        const response = await tokenRefreshApi();
         if (response.data.status == "SUCCESS") {
           setJwtToken(response.data.data.jwtToken);
-          setRefreshToken(response.data.data.refreshToken);
           setIsAuthenticated(true);
           sessionStorage.setItem("jwtToken", response.data.data.jwtToken);
-          sessionStorage.setItem(
-            "refreshToken",
-            response.data.data.refreshToken
-          );
           sessionStorage.setItem("isAuthenticated", true);
         } else {
           toast.error("Failed to refresh token. Please login again.");
@@ -80,27 +53,20 @@ export const AuthProvider = ({ children }) => {
       }
     }, 240000);
     return () => clearInterval(intervalReference.current);
-  }, [jwtToken, refreshToken]);
+  }, [jwtToken]);
 
   const login = async (data) => {
     try {
       const response = await loginApi(data);
       if (response.data.status == "SUCCESS") {
         setJwtToken(response.data.data.jwtToken);
-        setRefreshToken(response.data.data.refreshToken);
-        setDeviceId(response.data.data.deviceId);
         setIsAuthenticated(true);
         sessionStorage.setItem("jwtToken", response.data.data.jwtToken);
-        sessionStorage.setItem("refreshToken", response.data.data.refreshToken);
         sessionStorage.setItem("isAuthenticated", true);
-        sessionStorage.setItem("deviceId", response.data.data.deviceId);
-        if (response.data.data.rememberMeToken != null) {
-          localStorage.setItem(
-            "rememberMeToken",
-            response.data.data.rememberMeToken
-          );
-          localStorage.setItem("deviceId", response.data.data.deviceId);
-        }
+        localStorage.setItem(
+          "rememberMeEnabled",
+          response.data.data.rememberMeEnabled,
+        );
         return { success: true, message: null };
       } else {
         return { success: false, message: response.message };
@@ -119,17 +85,12 @@ export const AuthProvider = ({ children }) => {
       const response = await rememberMeLoginApi(data);
       if (response.data.status == "SUCCESS") {
         setJwtToken(response.data.data.jwtToken);
-        setRefreshToken(response.data.data.refreshToken);
-        setDeviceId(response.data.data.deviceId);
         setIsAuthenticated(true);
         sessionStorage.setItem("jwtToken", response.data.data.jwtToken);
-        sessionStorage.setItem("refreshToken", response.data.data.refreshToken);
         sessionStorage.setItem("isAuthenticated", true);
-        sessionStorage.setItem("deviceId", response.data.data.deviceId);
-        localStorage.setItem("deviceId", response.data.data.deviceId);
         localStorage.setItem(
-          "rememberMeToken",
-          response.data.data.rememberMeToken
+          "rememberMeEnabled",
+          response.data.data.rememberMeEnabled,
         );
         return { success: true, message: null };
       } else {
@@ -149,8 +110,6 @@ export const AuthProvider = ({ children }) => {
     login,
     handleLogout,
     rememberMeLogin,
-    refreshToken,
-    deviceId,
     isAuthenticated,
   };
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

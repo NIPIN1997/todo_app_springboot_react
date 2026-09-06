@@ -75,6 +75,8 @@ public class Constants {
         public static final String CSRF_TOKEN_CREATED = "CSRF token created.";
         public static final String FAILED_TO_REFRESH_TOKEN = "Failed to refresh token.";
         public static final String AN_UNEXCEPTED_ERROR_OCCURRED = "An unexpected error occurred.";
+        public static final String STRICT="Strict";
+        public static final String LAX="Lax";
     }
 
     public static class Redis {
@@ -127,6 +129,8 @@ public class Constants {
 
         public static final String FAILED_TO_CREATE_DASHBOARD_COLUMN = "Failed to create dashboard column.";
         public static final String DASHBOARD_COLUMN_NOT_FOUND = "Dashboard column not found.";
+        public static final String DASHBOARD_COLUMN_NAME_EDITED = "Dashboard column name edited.";
+        public static final String FAILED_TO_EDIT_DASHBOARD_COLUMN_NAME = "Failed to edit dashboard column name.";
     }
 
     public static class Invitation {

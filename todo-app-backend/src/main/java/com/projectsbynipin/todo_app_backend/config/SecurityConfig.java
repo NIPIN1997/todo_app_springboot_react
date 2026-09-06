@@ -42,7 +42,7 @@ public class SecurityConfig {
                                 Endpoints.adminEndpoints
                         ).hasAuthority("ROLE_ADMIN")
                         .requestMatchers(
-                                Endpoints.userEndpoints
+                                Endpoints.userOnlyEndpoints
                         ).hasAuthority("ROLE_USER")
                         .requestMatchers("/actuator/**").permitAll()
                         .anyRequest().authenticated()

@@ -5,7 +5,10 @@ import { toast } from "react-toastify";
 const BASE_URL = import.meta.env.VITE_BACKEND_BASE_URL;
 const BASE_URL_USERS = `${BASE_URL}/api/v1/users`;
 
-export const api = axios.create({ baseURL: BASE_URL_USERS });
+export const api = axios.create({
+  baseURL: BASE_URL_USERS,
+  withCredentials: true,
+});
 
 api.interceptors.response.use(
   (response) => response,
@@ -33,16 +36,8 @@ export const loginApi = async (data) => {
   return response;
 };
 
-export const tokenRefreshApi = async (jwtToken, refreshToken, deviceId) => {
-  const data = {
-    refreshToken: refreshToken,
-    deviceId: deviceId,
-  };
-  const response = await api.post(`/refresh-token`, data, {
-    headers: {
-      Authorization: `Bearer ${jwtToken}`,
-    },
-  });
+export const tokenRefreshApi = async () => {
+  const response = await api.post(`/refresh-token`);
   return response;
 };
 
@@ -64,10 +59,10 @@ export const editUser = async (jwtToken, data) => {
   return response;
 };
 
-export const logoutApi = async (jwtToken, deviceId) => {
+export const logoutApi = async (jwtToken) => {
   const response = await api.post(
     `/logout`,
-    { deviceId },
+    {},
     {
       headers: {
         Authorization: `Bearer ${jwtToken}`,
@@ -86,10 +81,10 @@ export const loggedInDevicesApi = async (jwtToken) => {
   return response;
 };
 
-export const deviceLogoutApi = async (jwtToken, deviceId) => {
+export const deviceLogoutApi = async (jwtToken) => {
   const response = await api.post(
     `/logout-device`,
-    { deviceId },
+    {},
     {
       headers: {
         Authorization: `Bearer ${jwtToken}`,
@@ -99,8 +94,8 @@ export const deviceLogoutApi = async (jwtToken, deviceId) => {
   return response;
 };
 
-export const rememberMeLoginApi = async (data) => {
-  const response = await api.post(`/remember-me-login`, data);
+export const rememberMeLoginApi = async () => {
+  const response = await api.post(`/remember-me-login`);
   return response;
 };
 
