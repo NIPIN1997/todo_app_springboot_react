@@ -2,16 +2,14 @@ package com.projectsbynipin.todo_app_backend.service.jwt;
 
 import com.projectsbynipin.todo_app_backend.entity.User;
 import com.projectsbynipin.todo_app_backend.entity.UserSession;
-import com.projectsbynipin.todo_app_backend.exception.UserNotFoundException;
-import com.projectsbynipin.todo_app_backend.repository.UserRepository;
 import com.projectsbynipin.todo_app_backend.repository.UserSessionRepository;
 import com.projectsbynipin.todo_app_backend.service.encryption.EncryptionService;
 import com.projectsbynipin.todo_app_backend.service.redis.RedisService;
-import com.projectsbynipin.todo_app_backend.utility.Constants;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -25,6 +23,7 @@ import java.util.UUID;
 import java.util.function.Function;
 
 @Service
+@RequiredArgsConstructor
 public class JwtService {
 
     @Value("${security.jwt.secret-key}")
@@ -40,51 +39,39 @@ public class JwtService {
     @Value("${security.jwt.remember-me-token-expiration-time}")
     private long jwtRememberMeTokenExpiration;
 
-    private final UserRepository userRepository;
     private final RedisService redisService;
     private final EncryptionService encryptionService;
     private final UserSessionRepository userSessionRepository;
-
-    public JwtService(UserRepository userRepository, RedisService redisService, EncryptionService encryptionService, UserSessionRepository userSessionRepository) {
-        this.userRepository = userRepository;
-        this.redisService = redisService;
-        this.encryptionService = encryptionService;
-        this.userSessionRepository = userSessionRepository;
-    }
 
     private Key getSignkey(String secretKey) {
         byte[] bytes = Decoders.BASE64.decode(secretKey);
         return Keys.hmacShaKeyFor(bytes);
     }
 
-    private String createToken(String email, long expirationTime, UUID deviceId, String secretKey) {
-        User user = userRepository.findByEmailAndIsDeleted(email, false);
-        if (user == null) {
-            throw new UserNotFoundException(Constants.User.USER_NOT_FOUND);
-        }
+    private String createToken(User user, long expirationTime, UUID deviceId, String secretKey) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("role", user.getRole().getName());
         claims.put("id", user.getId());
         claims.put("deviceId", deviceId);
         return Jwts.builder()
                 .claims(claims)
-                .subject(email)
+                .subject(user.getEmail())
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + expirationTime))
                 .signWith(getSignkey(secretKey))
                 .compact();
     }
 
-    public String generateToken(String email, UUID deviceId) {
-        return createToken(email, jwtTokenExpiration, deviceId, jwtSecretKey);
+    public String generateToken(User user, UUID deviceId) {
+        return createToken(user, jwtTokenExpiration, deviceId, jwtSecretKey);
     }
 
-    public String generateRefreshToken(String email, UUID deviceId) {
-        return createToken(email, jwtRefreshTokenExpiration, deviceId, refreshTokenSecretKey);
+    public String generateRefreshToken(User user, UUID deviceId) {
+        return createToken(user, jwtRefreshTokenExpiration, deviceId, refreshTokenSecretKey);
     }
 
-    public String generateRememberMeToken(String email, UUID deviceId) {
-        return createToken(email, jwtRememberMeTokenExpiration, deviceId, rememberMeTokenSecretKey);
+    public String generateRememberMeToken(User user, UUID deviceId) {
+        return createToken(user, jwtRememberMeTokenExpiration, deviceId, rememberMeTokenSecretKey);
     }
 
     private Claims extractAllClaims(String token, String secretKey) {

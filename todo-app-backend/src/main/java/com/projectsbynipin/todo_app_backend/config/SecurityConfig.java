@@ -1,6 +1,7 @@
 package com.projectsbynipin.todo_app_backend.config;
 
 import com.projectsbynipin.todo_app_backend.filter.JwtAuthFilter;
+import com.projectsbynipin.todo_app_backend.utility.Endpoints;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -34,13 +35,16 @@ public class SecurityConfig {
                 .cors(Customizer.withDefaults())
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/v1/users/login", "/api/v1/users/signup", "/api/v1/users/remember-me-login").permitAll()
-                        .requestMatchers("/api/v1/users/create-admin", "/api/v1/roles/create-role").hasAuthority("ROLE_ADMIN")
                         .requestMatchers(
-                                "/api/v1/users/get-user/**",
-                                "/api/v1/users/edit-user/**"
+                                Endpoints.publicEndpoints
+                        ).permitAll()
+                        .requestMatchers(
+                                Endpoints.adminEndpoints
+                        ).hasAuthority("ROLE_ADMIN")
+                        .requestMatchers(
+                                Endpoints.userEndpoints
                         ).hasAuthority("ROLE_USER")
-                        .requestMatchers("/actuator/**").hasAuthority("ROLE_ADMIN")
+                        .requestMatchers("/actuator/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(e -> e.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

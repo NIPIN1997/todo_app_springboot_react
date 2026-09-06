@@ -10,16 +10,21 @@ import java.util.UUID;
 
 @Repository
 public interface UserSessionRepository extends JpaRepository<UserSession, UUID> {
+
+    @Query("select u from UserSession u  where u.deviceId = :deviceId")
     UserSession findByDeviceId(UUID deviceId);
 
-    List<UserSession> findByUserIdAndIsActive(UUID userId, boolean isActive);
+    List<UserSession> findByUserIdAndActive(UUID userId, boolean active);
 
-    @Query("from UserSession u where u.isActive = true and u.rememberMe = false")
+    @Query("select u from UserSession u where u.active = true and u.rememberMe = false")
     List<UserSession> getAllActiveNotRememberedSessions();
 
-    @Query("from UserSession u where u.isActive = true and u.rememberMe = true")
+    @Query("select u from UserSession u where u.active = true and u.rememberMe = true")
     List<UserSession> getAllActiveRememberedSessions();
 
-    @Query("from UserSession u where u.isActive = false")
+    @Query("select u from UserSession u where u.active = false")
     List<UserSession> getAllInactiveSessions();
+
+    @Query("select u from UserSession u where u.redisKey = :redisKey and u.active = true and u.rememberMe = false")
+    UserSession findSessionByRedisKey(String redisKey);
 }

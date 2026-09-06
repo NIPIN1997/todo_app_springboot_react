@@ -1,0 +1,39 @@
+.navigation_bar {
+  position: fixed;
+  top: 140px;
+  width: 100%;
+  z-index: 1;
+  opacity: 1;
+  background-color: white;
+}
+.navigation_item {
+  font-weight: bold;
+  font-size: 18px;
+}
+.content_div {
+  position: relative;
+  top: 220px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  justify-content: center;
+  width: 100%;
+  gap: 30px 30px;
+  justify-items: center;
+}
+.dashboard_card_div {
+  display: flex;
+  justify-content: space-between;
+}
+.chart_div {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  height: 200x;
+  align-items: center;
+}
+.button_div{
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}

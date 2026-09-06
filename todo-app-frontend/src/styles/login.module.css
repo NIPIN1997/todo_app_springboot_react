@@ -3,13 +3,14 @@
   margin-left: auto;
   margin-right: auto;
   height: 350px;
-  border: 1px solid rgb(57, 57, 57);
+  border: 1px solid rgb(221, 221, 221);
   color: rgb(57, 57, 57);
   position: relative;
   top: 200px;
   padding: 30px;
   font-size: 20px;
   border-radius: 10px;
+  box-shadow: rgba(0, 0, 0, 0.15) 1.95px 1.95px 2.6px;
 }
 .heading {
   text-align: center;

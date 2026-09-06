@@ -4,4 +4,8 @@ public class FailedToSaveRoleException extends RuntimeException {
     public FailedToSaveRoleException(String message) {
         super(message);
     }
+
+    public FailedToSaveRoleException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }

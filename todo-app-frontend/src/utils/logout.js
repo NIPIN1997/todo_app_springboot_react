@@ -20,11 +20,7 @@ export async function logout(jwtToken) {
 export async function forcedLogout() {
   toast.error("Access denied.");
   setTimeout(() => {
-    sessionStorage.removeItem("jwtToken");
-    sessionStorage.removeItem("refreshToken");
-    sessionStorage.removeItem("isAuthenticated");
-    sessionStorage.removeItem("deviceId");
-    localStorage.removeItem("deviceId");
+    logout(sessionStorage.getItem("jwtToken"));
     window.location.href = "/";
   }, 3000);
 }

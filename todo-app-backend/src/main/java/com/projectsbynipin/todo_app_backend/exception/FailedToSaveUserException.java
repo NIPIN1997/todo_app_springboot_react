@@ -4,4 +4,8 @@ public class FailedToSaveUserException extends RuntimeException {
     public FailedToSaveUserException(String message) {
         super(message);
     }
+
+    public FailedToSaveUserException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }

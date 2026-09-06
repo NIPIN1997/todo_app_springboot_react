@@ -1,0 +1,33 @@
+.main_div {
+  position: relative;
+  top: 150px;
+  width: 50%;
+  margin-left: auto;
+  margin-right: auto;
+}
+.header {
+  text-align: center;
+  font-weight: bolder;
+  font-size: 30px;
+  margin-bottom: 25px;
+}
+.invitation_item {
+  display: flex;
+  justify-content: space-between;
+  border: 2px solid rgb(221, 221, 221);
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: rgba(0, 0, 0, 0.15) 1.95px 1.95px 2.6px;
+  font-size: 18px;
+}
+.invitation_item_buttons_div {
+  display: flex;
+  justify-content: space-around;
+  gap: 30px;
+}
+.no_invitations_message {
+  text-align: center;
+  font-size: 18px;
+  font-style: italic;
+  margin-top: 50px;
+}

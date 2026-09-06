@@ -11,28 +11,20 @@ export function Devices() {
   const [devices, setDevices] = useState([]);
   const { jwtToken, handleLogout } = useAuth();
   const getDevices = async () => {
-    try {
-      const response = await loggedInDevicesApi(jwtToken);
-      setDevices(response.data.data);
-    } catch (error) {
-      toast.error("Failed to fetch logged in devices");
-    }
+    const response = await loggedInDevicesApi(jwtToken);
+    setDevices(response.data.data);
   };
   useEffect(() => {
     getDevices();
   }, []);
   const handleClick = async (device) => {
-    try {
-      const response = await deviceLogoutApi(jwtToken, device);
-      if (response.status == 200) {
-        if (String(localStorage.getItem("deviceId")) === String(device)) {
-          handleLogout();
-        } else {
-          getDevices();
-        }
+    const response = await deviceLogoutApi(jwtToken, device);
+    if (response.status == 200) {
+      if (String(localStorage.getItem("deviceId")) === String(device)) {
+        handleLogout();
+      } else {
+        getDevices();
       }
-    } catch (error) {
-      toast.error("Failed to logout from device.");
     }
   };
   return (
@@ -45,7 +37,7 @@ export function Devices() {
           <div key={index} className={styles.devices_sub_division}>
             <div className={styles.single_device_division}>
               {index + 1}. {element.browser} on {element.os} {element.osVersion}
-              {String(localStorage.getItem("deviceId")) ===
+              {String(sessionStorage.getItem("deviceId")) ===
                 String(element.deviceId) && <span> (this device) </span>}
             </div>
             <div>

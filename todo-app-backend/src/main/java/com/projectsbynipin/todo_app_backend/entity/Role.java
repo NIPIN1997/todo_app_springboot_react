@@ -15,13 +15,13 @@ import lombok.NoArgsConstructor;
         schema = "user_schema",
         name = "roles",
         indexes = {
-                @Index(name = "idx_roles_name", columnList = "name")
+                @Index(name = "idx_roles_name_roles_table", columnList = "name")
         }
 )
 public class Role {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", updatable = false)
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(name = "id", updatable = false, nullable = false)
     private long id;
     @Column(name = "name", nullable = false, unique = true)
     private String name;

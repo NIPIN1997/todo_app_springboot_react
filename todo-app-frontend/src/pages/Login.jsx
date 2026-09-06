@@ -6,7 +6,6 @@ import Row from "react-bootstrap/Row";
 import styles from "../styles/login.module.css";
 import { useEffect, useState } from "react";
 import { useAuth } from "../hooks/UseAuth.jsx";
-import { toast } from "react-toastify";
 import { Link, useNavigate } from "react-router-dom";
 
 export function Login() {
@@ -45,8 +44,6 @@ export function Login() {
     const { success, message } = await login(payload);
     if (success) {
       navigate("/home");
-    } else {
-      toast.error(message);
     }
   };
 

@@ -5,6 +5,8 @@ import { ProtectedRoute } from "../components/ProtectedRoute.jsx";
 import { MyAccount } from "../pages/MyAccount.jsx";
 import { Devices } from "../pages/Devices.jsx";
 import { Signup } from "../pages/Signup.jsx";
+import { Invitations } from "../pages/Invitations.jsx";
+import { Dashboards } from "../pages/Dashboards.jsx";
 
 export function AppRoutes() {
   return (
@@ -32,6 +34,22 @@ export function AppRoutes() {
         element={
           <ProtectedRoute>
             <Devices />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/invitations"
+        element={
+          <ProtectedRoute>
+            <Invitations />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/dashboards"
+        element={
+          <ProtectedRoute>
+            <Dashboards />
           </ProtectedRoute>
         }
       />

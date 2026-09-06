@@ -1,6 +1,6 @@
 import axios from "axios";
-import { jwtDecode } from "jwt-decode";
 import { forcedLogout } from "../utils/logout";
+import { toast } from "react-toastify";
 
 const BASE_URL = import.meta.env.VITE_BACKEND_BASE_URL;
 const BASE_URL_USERS = `${BASE_URL}/api/v1/users`;
@@ -10,11 +10,22 @@ export const api = axios.create({ baseURL: BASE_URL_USERS });
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response && error.response.status === 403) {
-      forcedLogout();
+    if (error.response) {
+      const status = error.response.status;
+      if (status === 403) {
+        forcedLogout();
+      } else if (status >= 400 && status < 500) {
+        toast.error(error.response.data?.message || "An error has occured");
+      } else if (status >= 500) {
+        toast.error(error.response.data?.message || "Internal server error");
+      } else if (error.request) {
+        toast.error("Network error");
+      } else {
+        toast.error("An error occured.");
+      }
     }
     return Promise.reject(error);
-  }
+  },
 );
 
 export const loginApi = async (data) => {
@@ -36,9 +47,7 @@ export const tokenRefreshApi = async (jwtToken, refreshToken, deviceId) => {
 };
 
 export const getUserById = async (jwtToken) => {
-  const decodedToken = jwtDecode(jwtToken);
-  const userId = decodedToken.id;
-  const response = await api.get(`/get-user/${userId}`, {
+  const response = await api.get(`/get-user`, {
     headers: {
       Authorization: `Bearer ${jwtToken}`,
     },
@@ -47,9 +56,7 @@ export const getUserById = async (jwtToken) => {
 };
 
 export const editUser = async (jwtToken, data) => {
-  const decodedToken = jwtDecode(jwtToken);
-  const userId = decodedToken.id;
-  const response = await api.put(`/edit-user/${userId}`, data, {
+  const response = await api.put(`/edit-user`, data, {
     headers: {
       Authorization: `Bearer ${jwtToken}`,
     },
@@ -65,15 +72,13 @@ export const logoutApi = async (jwtToken, deviceId) => {
       headers: {
         Authorization: `Bearer ${jwtToken}`,
       },
-    }
+    },
   );
   return response;
 };
 
 export const loggedInDevicesApi = async (jwtToken) => {
-  const decodedToken = jwtDecode(jwtToken);
-  const userId = decodedToken.id;
-  const response = await api.get(`/logged-in-devices/${userId}`, {
+  const response = await api.get(`/logged-in-devices`, {
     headers: {
       Authorization: `Bearer ${jwtToken}`,
     },
@@ -89,7 +94,7 @@ export const deviceLogoutApi = async (jwtToken, deviceId) => {
       headers: {
         Authorization: `Bearer ${jwtToken}`,
       },
-    }
+    },
   );
   return response;
 };
@@ -101,5 +106,15 @@ export const rememberMeLoginApi = async (data) => {
 
 export const signupApi = async (data) => {
   const response = await api.post(`/signup`, data);
+  return response;
+};
+
+export const checkUsername = async (jwtToken, username) => {
+  const response = await api.get(`/check-username-existence`, {
+    params: { username },
+    headers: {
+      Authorization: `Bearer ${jwtToken}`,
+    },
+  });
   return response;
 };

@@ -1,0 +1,186 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: postgres_db
+    ports:
+      - 5000:5432
+    networks:
+      - checklist_network
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres1234
+      POSTGRES_DB: todo
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres -d todo" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  backend:
+    build: .
+    container_name: checklist
+    ports:
+      - 8080:8080
+    expose:
+      - "8081"
+    networks:
+      - checklist_network
+    environment:
+      DATABASE_URL: jdbc:postgresql://postgres:5432/todo
+      DATABASE_USERNAME: postgres
+      DATABASE_PASSWORD: postgres1234
+      JWT_SECRET_KEY: JorYlVVP8Cm4f+kv/s5f/VKI3purD0zVUIp9f9ZksTk=
+      JWT_REFRESH_TOKEN_SECRET_KEY: C/8vCWoicHo0Ba8/c7KNMgrRQFF2OdhFhD0tNz3HJgo=
+      JWT_REMEMBER_ME_TOKEN_SECRET_KEY: FwvGyOIUA+rWrSaIYkL+JkA+Psh8pcWfz5Rxj4Kmdi0=
+      JWT_TOKEN_EXPIRATION_TIME: 300000
+      JWT_REFRESH_TOKEN_EXPIRATION_TIME: 1800000
+      JWT_REMEMBER_ME_TOKEN_EXPIRATION_TIME: 604800000
+      AES_SECRET_KEY: pmaEx4mbGS983hDbyZpCmiH0A7bgz5iIpDLfVJ9LF00=
+      IS_HTTPS: false
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      FRONTEND_URL: http://localhost:5173
+      KAFKA: kafka:9092
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+      redis:
+        condition: service_healthy
+
+  redis:
+    image: redis:latest
+    container_name: redis_server
+    ports:
+      - 6379:6379
+    volumes:
+      - redis_data:/data
+    command: [ "redis-server","--notify-keyspace-events","Ex" ]
+    restart: unless-stopped
+    networks:
+      - checklist_network
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.4.0
+    container_name: zookeeper
+    environment:
+      - ZOOKEEPER_CLIENT_PORT=2181
+    ports:
+      - 2181:2181
+    networks:
+      - checklist_network
+
+  kafka:
+    image: confluentinc/cp-kafka:7.4.0
+    container_name: kafka
+    depends_on:
+      - zookeeper
+    environment:
+      - KAFKA_BROKER_ID=1
+      - KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181
+      - KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      - KAFKA_LISTENERS=PLAINTEXT://0.0.0.0:9092,PLAINTEXT_HOST://0.0.0.0:9093
+      - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:9093
+      - KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1
+    ports:
+      - 9092:9092
+      - 9093:9093
+    restart: unless-stopped
+    networks:
+      - checklist_network
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: kafka-ui
+    depends_on:
+      - zookeeper
+      - kafka
+    environment:
+      - KAFKA_CLUSTERS_0_NAME=local
+      - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafka:9092
+      - KAFKA_CLUSTERS_0_ZOOKEEPER=zookeeper:2181
+    ports:
+      - 9000:8080
+    networks:
+      - checklist_network
+
+  elasticsearch:
+    image: elasticsearch:8.12.1
+    container_name: elasticsearch
+    depends_on:
+      - kafka
+    environment:
+      - discovery.type=single-node
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+      - xpack.security.enabled=false
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    ports:
+      - 9200:9200
+    networks:
+      - checklist_network
+
+  logstash:
+    image: logstash:8.12.1
+    container_name: logstash
+    depends_on:
+      - elasticsearch
+    volumes:
+      - ./logstash.conf:/usr/share/logstash/pipeline/logstash.conf:ro
+    ports:
+      - 5044:5044
+    networks:
+      - checklist_network
+
+  kibana:
+    image: kibana:8.12.1
+    container_name: kibana
+    depends_on:
+      - elasticsearch
+    ports:
+      - 5601:5601
+    networks:
+      - checklist_network
+
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    ports:
+      - 9090:9090
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    depends_on:
+      - backend
+    networks:
+      - checklist_network
+
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    ports:
+      - 3000:3000
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+    depends_on:
+      - prometheus
+    networks:
+      - checklist_network
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  checklist_network:

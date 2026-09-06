@@ -1,12 +1,14 @@
-import Container from "react-bootstrap/Container";
 import { Header } from "../components/Header";
 import { NavigationBar } from "../components/NavigationBar.jsx";
+import { Tasks } from "../components/Tasks.jsx";
+import styles from "../styles/home.module.css";
 
 export function Home() {
   return (
-    <Container>
+    <div className={styles.main_division}>
       <Header />
       <NavigationBar />
-    </Container>
+      <Tasks />
+    </div>
   );
 }

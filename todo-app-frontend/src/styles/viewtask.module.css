@@ -1,0 +1,40 @@
+.taskTitle {
+  font-size: 25px;
+  font-weight: bold;
+}
+.first_div {
+  display: flex;
+  justify-content: center;
+  gap: 50px;
+}
+.first_div > div {
+  width: 200px;
+  height: 100px;
+  border-radius: 10px;
+  background-color: rgb(245, 245, 245);
+  padding: 10px;
+  color: rgb(57, 57, 57);
+  text-align: center;
+}
+.progress_div {
+  width: 80%;
+  padding: 10px;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 20px;
+  border-radius: 10px;
+}
+.progress_div > h5 {
+  text-align: center;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+.description_div {
+  text-align: left;
+  border: 1px solid rgb(57, 57, 57);
+  border-radius: 10px;
+  height: 100px;
+  padding: 10px;
+  width: 80%;
+  overflow-y: auto;
+}

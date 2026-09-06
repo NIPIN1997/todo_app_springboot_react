@@ -19,14 +19,14 @@ import java.util.UUID;
         schema = "user_schema",
         name = "user_sessions",
         indexes = {
-                @Index(name = "idx_device_id", columnList = "device_id")
+                @Index(name = "idx_device_id_user_sessions_table", columnList = "device_id")
         }
 )
 public class UserSession {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "id", updatable = false)
+    @Column(name = "id", updatable = false, nullable = false)
     private UUID id;
     @Column(name = "device_id", updatable = false, nullable = false, unique = true)
     private UUID deviceId;
@@ -46,11 +46,13 @@ public class UserSession {
     @Column(name = "logout_time")
     private LocalDateTime logoutTime;
     @Column(name = "is_active")
-    private boolean isActive = true;
+    private boolean active = true;
     @Column(name = "remember_me")
     private boolean rememberMe = false;
     @Column(name = "remember_me_token", columnDefinition = "TEXT")
     private String rememberMeToken;
+    @Column(name = "redis_key", nullable = false)
+    private String redisKey;
     @Column(name = "last_updated")
     private LocalDateTime lastUpdated;
 }

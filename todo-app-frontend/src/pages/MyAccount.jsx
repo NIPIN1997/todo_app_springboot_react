@@ -21,12 +21,8 @@ export function MyAccount() {
     setData(user);
   }, [user]);
   const getUser = async () => {
-    try {
-      const response = await getUserById(jwtToken);
-      setUser(response.data.data);
-    } catch (error) {
-      toast.error("Failed to fetch account details. Error - ", error);
-    }
+    const response = await getUserById(jwtToken);
+    setUser(response.data.data);
   };
   useEffect(() => {
     getUser();
@@ -45,7 +41,6 @@ export function MyAccount() {
       setIsEdit(false);
       getUser();
     } else {
-      toast.error("Failed to edit data. Please try again.");
       setIsEdit(false);
     }
   };

@@ -2,6 +2,7 @@ package com.projectsbynipin.todo_app_backend.service.encryption;
 
 import com.projectsbynipin.todo_app_backend.exception.LoginFailedException;
 import com.projectsbynipin.todo_app_backend.utility.Constants;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ua_parser.Client;
 
@@ -11,6 +12,7 @@ import java.util.Base64;
 import java.util.UUID;
 
 @Service
+@RequiredArgsConstructor
 public class HashingService {
 
     public String hashDeviceId(Client client, UUID deviceId) {
@@ -20,7 +22,7 @@ public class HashingService {
             byte[] hashBytes = messageDigest.digest(combine.getBytes(StandardCharsets.UTF_8));
             return Base64.getEncoder().encodeToString(hashBytes);
         } catch (Exception e) {
-            throw new LoginFailedException(Constants.Login.LOGIN_FAILED);
+            throw new LoginFailedException(Constants.Login.LOGIN_FAILED, e);
         }
     }
 }

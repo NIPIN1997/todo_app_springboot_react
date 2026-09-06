@@ -15,17 +15,19 @@ public interface UserService {
 
     ApiResponse<LoginResponseDto> login(LoginRequestDto loginRequestDto, HttpServletRequest httpServletRequest);
 
-    ApiResponse<ViewUserResponseDto> getUser(UUID userId, UserInfoDetails userInfoDetails);
+    ApiResponse<ViewUserResponseDto> getUser(UserInfoDetails userInfoDetails);
 
     ApiResponse<LoginResponseDto> refreshToken(RefreshTokenRequestDto refreshTokenRequestDto, HttpServletRequest httpServletRequest);
 
-    ApiResponse<Void> editUser(UUID userId, EditUserRequestDto editUserRequestDto, UserInfoDetails userInfoDetails);
+    ApiResponse<Void> editUser(EditUserRequestDto editUserRequestDto, UserInfoDetails userInfoDetails);
 
-    ApiResponse<Void> logout(String username, LogoutRequestDto logoutRequestDto);
+    ApiResponse<Void> logout(String username, LogoutRequestDto logoutRequestDto, HttpServletRequest httpServletRequest);
 
-    ApiResponse<List<LoggedInDevicesResponseDto>> loggedInDevices(UUID userId, String username);
+    ApiResponse<List<LoggedInDevicesResponseDto>> loggedInDevices(String username);
 
     ApiResponse<Void> logoutDevices(UUID deviceId, UserInfoDetails userInfoDetails);
 
     ApiResponse<LoginResponseDto> rememberMeLogin(@Valid RememberMeLoginRequestDto rememberMeLoginRequestDto, HttpServletRequest httpServletRequest);
+
+    ApiResponse<String> checkUsernameExistence(String username, UserInfoDetails userInfoDetails);
 }

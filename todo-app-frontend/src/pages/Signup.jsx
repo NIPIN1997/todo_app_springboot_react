@@ -29,7 +29,6 @@ export function Signup() {
         toast.success("Account created. Please login.");
         navigate("/");
       } else {
-        toast.error("Failed to create account. Please try again.");
         window.location.reload();
       }
     } else {
@@ -53,7 +52,7 @@ export function Signup() {
                 id="name"
                 name="name"
                 required
-                pattern="[a-zA-Z]{3,}"
+                pattern="[a-zA-Z ]{3,}"
                 title="Please enter valid name."
                 onChange={handleChange}
               />

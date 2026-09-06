@@ -4,4 +4,8 @@ public class JwtRefreshTokenExpiredException extends RuntimeException {
     public JwtRefreshTokenExpiredException(String message) {
         super(message);
     }
+
+    public JwtRefreshTokenExpiredException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }

@@ -4,4 +4,8 @@ public class FailedToLogoutDeviceException extends RuntimeException {
     public FailedToLogoutDeviceException(String message) {
         super(message);
     }
+
+    public FailedToLogoutDeviceException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }
